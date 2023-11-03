@@ -1,0 +1,13 @@
+{
+   "connection": {
+     "multipleStatements": true,
+     "host": "dbcommissairenew.cig6gnsg5vjp.eu-central-1.rds.amazonaws.com",
+     "user": "admin",
+     "password": "zaqzaq8*",
+     "database": "commissaire",
+     "connectTimeout" : 10000,
+     "port": 3306,
+     "dialect": "mysql"
+   }
+}
+

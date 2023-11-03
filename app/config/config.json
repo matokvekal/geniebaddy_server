@@ -1,0 +1,11 @@
+{
+    "currentLanguage": "he",
+    "googlemapsApiKey": "AIzaSyCsSCPe9Pm6XLfOxrmkZdvbsqkzVJzR1rM",
+    "maxFileSize":"5000000",
+    "maxFileNameSize":"45",
+    "rowsinChank":"200",
+    "defaultRadius":"40",
+    "MINUTES_TO_REMOVE_OLD_RIDERS":"60",
+    "USER_CHATS_PER_POST":3,
+    "USER_POSTS_PER_DAY":3
+}

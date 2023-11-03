@@ -1,0 +1,70 @@
+image: node:10.15.3
+
+pipelines:
+  branches:
+    dev:
+      - step:
+          name: 'Deployment to Staging'
+          deployment: staging
+          caches:
+            - node
+          script: # Modify the commands below to build your repository.
+            - apt-get update && apt-get install -y rsync
+            - ssh-keyscan -H $SSH_DEV_SERVER_IP >> ~/.ssh/known_hosts
+            - cd $BITBUCKET_CLONE_DIR
+            - rsync -r -v -e ssh . $SSH_SERVER_USER@$SSH_DEV_SERVER_IP:/var/opt/server-commissaire --delete-before --exclude '.git'
+            - ssh $SSH_SERVER_USER@$SSH_DEV_SERVER_IP 'cd /var/opt/server-commissaire && sudo npm install'
+            #- ssh $SSH_SERVER_USER@$SSH_DEV_SERVER_IP 'cd /var/opt/server-commissaire && npm run build'
+            - ssh $SSH_SERVER_USER@$SSH_DEV_SERVER_IP 'cd /var/opt/server-commissaire && npm run start:dev'
+    # master:
+    #   - step:
+    #       name: 'Deployment to Production'
+    #       deployment: production
+    #       caches:
+    #         - node
+    #       script: # Modify the commands below to build your repository.
+    #         - apt-get update && apt-get install -y rsync
+    #         - ssh-keyscan -H $SSH_PROD_SERVER_IP >> ~/.ssh/known_hosts
+    #         - cd $BITBUCKET_CLONE_DIR
+    #         - rsync -r -v -e ssh . $SSH_SERVER_USER@$SSH_PROD_SERVER_IP:/var/opt/server-commissaire --delete-before --exclude '.git'
+    #         - ssh $SSH_SERVER_USER@$SSH_PROD_SERVER_IP 'cd /var/opt/greeenfleet-admin && sudo npm install'
+    #         #- ssh $SSH_SERVER_USER@$SSH_DEV_SERVER_IP 'cd /var/opt/server-commissaire && npm run build'
+    #         - ssh $SSH_SERVER_USER@$SSH_PROD_SERVER_IP 'cd /var/opt/server-commissaire && npm run start:prod'
+
+
+
+# TODO: REMOVE
+# This is an example Starter pipeline configuration
+# Use a skeleton to build, test and deploy using manual and parallel steps
+# -----
+# You can specify a custom docker image from Docker Hub as your build environment.
+# image: atlassian/default-image:2
+
+# pipelines:
+#   default:
+#     - parallel:
+#       - step:
+#           name: 'Build and Test'
+#           script:
+#             - echo "Your build and test goes here..."
+#       - step:
+#           name: 'Lint'
+#           script:
+#             - echo "Your linting goes here..."
+#       - step:
+#           name: 'Security scan'
+#           script:
+#             - echo "Your security scan goes here..."
+
+#     # The following deployment steps will be executed for each pipeline run. To configure your steps and conditionally deploy see https://support.atlassian.com/bitbucket-cloud/docs/configure-bitbucket-pipelinesyml/
+#     - step:
+#         name: 'Deployment to Staging'
+#         deployment: staging
+#         script:
+#           - echo "Your deployment to staging script goes here..."
+#     - step:
+#         name: 'Deployment to Production'
+#         deployment: production
+#         trigger: 'manual'
+#         script:
+#           - echo "Your deployment to production script goes here..."
