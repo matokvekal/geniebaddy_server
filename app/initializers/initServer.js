@@ -47,12 +47,15 @@ export default async (config) => {
 			origin: [
 				'http://localhost',
 				'https://localhost',
-				'http://212.80.207.146',
+				'http://3.79.151.83:5000',
+				'https://3.79.151.83:5000',
 				'http://localhost:3000',
 				'http://localhost:3001',
 				'https://212.80.207.146',
-				'https://localhost:3000',
+				'https://localhost:5000',
+				'http://localhost:5000',
 			], // (Whatever your frontend url is)
+			methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
 			credentials: true, // <= Accept credentials (cookies) sent by the client
 		}),
 	);
