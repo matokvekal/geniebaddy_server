@@ -54,6 +54,8 @@ export default async (config) => {
 				'https://212.80.207.146',
 				'https://localhost:5000',
 				'http://localhost:5000',
+				'http://genieclient.s3-website.eu-central-1.amazonaws.com',
+				'https://genieclient.s3-website.eu-central-1.amazonaws.com:5000',
 			], // (Whatever your frontend url is)
 			methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
 			credentials: true, // <= Accept credentials (cookies) sent by the client
