@@ -90,6 +90,10 @@ class AuthController extends BaseController {
 					return res.status(200).send({ token, user_name, user_role });
 				}
 			}
+			return await res.createErrorLogAndSend({
+				message: ServerLoginMessages.NO_DATA,
+				status: 400,
+			});
 		} catch (err) {
 			return await res.createErrorLogAndSend('Error at login');
 		}
