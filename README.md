@@ -20,3 +20,11 @@ when get users test that they has location
 2.server chenc for email/phone
 3/server AI
 4.what if user try /genie and the opocite (have to do it each controller)
+
+-------WORKING__________________
+linux connection:
+ssh -i "commisaire-2023.pem" ubuntu@ec2-3-79-151-83.eu-central-1.compute.amazonaws.com
+
+key:
+ commisaire-2023.pem
+

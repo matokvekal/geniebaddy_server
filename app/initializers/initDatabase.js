@@ -3,6 +3,11 @@ import Logger from '../utils/Logger';
 import initDatabaseModels from './initDatabaseModels'
 
 export default async (config) => {
+	console.log('config.database.NAME', config.database.NAME);
+	//log  db host,user,password,name
+	console.log('config.database.HOST', config.database.HOST);
+	console.log('config.database.USER', config.database.USER);
+	console.log('config.database.PASSWORD', config.database.PASSWORD);
 	const sequelize = new Sequelize(
 		config.database.NAME,
 		config.database.USER,
