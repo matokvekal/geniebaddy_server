@@ -89,14 +89,14 @@ class UserController extends BaseController {
 		console.log('get userSendPost');
 		// console.log('userpost', req.body);
 		const { topic_id, header, message, post_id,avatar } = req.body;
-		if (!message || !topic_id || !header || !post_id) {
+		if (!message|| !post_id) {
 			return res.status(400).json({ error: 'Invalid request' });
 		}
 		const user = req.user; // Assuming user is attached to req by previous middleware
 		const today = moment.utc().format('YYYY-MM-DD');
 		try {
 			if (post_id === 'new') {
-				const SQL1 = `SELECT used_posts_date, user_posts_count
+				const SQL1 = `SELECT user_posts_count_date, user_posts_count
 			   FROM genie_users WHERE id = :userId`;
 				const userPosts = await this.sequelize.query(SQL1, {
 					replacements: { userId: user.id },
@@ -105,7 +105,7 @@ class UserController extends BaseController {
 
 				const userRecord = userPosts[0];
 				if (userRecord) {
-					const userRecordDate = moment(userRecord.used_posts_date).format(
+					const userRecordDate = moment(userRecord.user_posts_count_date).format(
 						'YYYY-MM-DD',
 					);
 					const numOfPosts = parseInt(userRecord.user_posts_count, 10);
@@ -122,10 +122,10 @@ class UserController extends BaseController {
 						const SQL2 = `
 						UPDATE genie_users
 						SET 
-							 used_posts_date = :today,
+							 user_posts_count_date = :today,
 							 user_posts_count = 
 							 CASE
-								  WHEN used_posts_date != :today THEN 1
+								  WHEN user_posts_count_date != :today THEN 1
 								  ELSE user_posts_count + 1
 							 END
 						WHERE id = :userId
@@ -139,7 +139,7 @@ class UserController extends BaseController {
 							transaction: transaction,
 						});
 
-						const SQL3 = `INSERT INTO genie_posts (is_active, post_status, topic_id, user_header, user_1, created_at, user_id,user_1_date,last_writen_by,is_block,usr_avatar) 
+						const SQL3 = `INSERT INTO genie_posts (is_active, post_status, topic_id, user_header, user_1, created_at, user_id,user_1_date,last_writen_by,is_block,user_avatar) 
 					VALUES (1, "new", :topic_id, :header, :user_1, UTC_TIMESTAMP(), :user_id,UTC_TIMESTAMP(),"user_1",0,:avatar)`;
 						const newPost = await this.sequelize.query(SQL3, {
 							replacements: {
