@@ -88,7 +88,7 @@ class UserController extends BaseController {
 	userSendPost = async (req, res) => {
 		console.log('get userSendPost');
 		// console.log('userpost', req.body);
-		const { topic_id, header, message, post_id,avatar } = req.body;
+		const { topic_id, header, message, post_id, avatar } = req.body;
 		if (!message || !topic_id || !header || !post_id) {
 			return res.status(400).json({ error: 'Invalid request' });
 		}
@@ -147,7 +147,7 @@ class UserController extends BaseController {
 								header,
 								user_1: message,
 								user_id: user.id,
-								avatar:avatar,
+								avatar: avatar,
 							},
 							type: QueryTypes.INSERT,
 							transaction: transaction,
