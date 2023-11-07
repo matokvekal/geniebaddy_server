@@ -15,6 +15,7 @@ momentTimeZone.tz.setDefault('Etc/UTC');
  */
 const cors = require('cors');
 export default async (config) => {
+	console.log('init server');
 	const app = express();
 	const adminRouter = express.Router();
 	const publicRouter = express.Router();

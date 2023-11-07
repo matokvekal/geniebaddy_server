@@ -5,7 +5,7 @@ import cors from 'cors';
 import config from "../config";
 
 const origin = config.allowedOrigins.split(',');
-// console.log("api middleware",origin);
+console.log("api middleware",origin);
 const middlewares = [
     cors({ credentials: true, origin:"*" }),
     express.urlencoded({ extended: true }),

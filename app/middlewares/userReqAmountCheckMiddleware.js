@@ -1,12 +1,10 @@
 import config from '../config';
-import cron from "node-cron";
-import {
-  createSingleLog,
-} from '../utils/apiLoggerUtils';
+import cron from 'node-cron';
+import { createSingleLog } from '../utils/apiLoggerUtils';
 
 const {
-  allowedAmountOfRequestsForIpPerMinute,
-  allowedAmountOfRequestsForIpPerFullDay
+	allowedAmountOfRequestsForIpPerMinute,
+	allowedAmountOfRequestsForIpPerFullDay,
 } = config;
 
 const MINUTE_CRON_FORMAT = '*/1 * * * *';
@@ -19,68 +17,80 @@ let minuteRequests = {};
 let fullDayRequests = {};
 
 const incrementOrInitialize = (obj, key) => {
-  obj[key] = obj[key] ? obj[key] + 1 : 1;
+	obj[key] = obj[key] ? obj[key] + 1 : 1;
 };
 
 cron.schedule(MINUTE_CRON_FORMAT, () => {
-  minuteRequests = {};
+	minuteRequests = {};
 });
 
 cron.schedule(DAY_CRON_FORMAT, () => {
-  fullDayRequests = {};
+	fullDayRequests = {};
 });
 
 const blockAndLogUser = async (req, db, additionalData) => {
-  const { user, owner_id } = req;
-  if (user && owner_id) {
-    await db.user.update({
-      blocked: 1,
-      block_date: new Date(),
-      ...additionalData
-    }, {
-      where: {
-        user_name: user.user_name,
-        owner_id,
-      }
-    });
-    await createSingleLog(db, req, `User: ${user.user_name}, per_minute:${minuteRequests[user.user_name]}, per_day:${fullDayRequests[user.user_name]}`);
-  }
+	const { user, owner_id } = req;
+	if (user && owner_id) {
+		await db.user.update(
+			{
+				blocked: 1,
+				block_date: new Date(),
+				...additionalData,
+			},
+			{
+				where: {
+					user_name: user.user_name,
+					owner_id,
+				},
+			},
+		);
+		await createSingleLog(
+			db,
+			req,
+			`User: ${user.user_name}, per_minute:${
+				minuteRequests[user.user_name]
+			}, per_day:${fullDayRequests[user.user_name]}`,
+		);
+	}
 };
 
 const userRequestRateLimiter = (db) => async (req, res, next) => {
-  try {
-    const { user } = req;
-    if (!user) return next();
+	try {
+		const { user } = req;
+		if (!user) return next();
 
-    if (user.blocked) {
-      throw { message: `USER ${user.user_name} IS BLOCKED`, status: 403 };
-    }
+		if (user.blocked) {
+			throw { message: `USER ${user.user_name} IS BLOCKED`, status: 403 };
+		}
 
-    const userNameKey = user.user_name;
-    incrementOrInitialize(minuteRequests, userNameKey);
-    incrementOrInitialize(fullDayRequests, userNameKey);
+		const userNameKey = user.user_name;
+		incrementOrInitialize(minuteRequests, userNameKey);
+		incrementOrInitialize(fullDayRequests, userNameKey);
 
-    if (minuteRequests[userNameKey] > allowedAmountOfRequestsForIpPerMinute) {
-      await blockAndLogUser(req, db, { requestsPerMinute: minuteRequests[userNameKey] });
-      throw { message: ERR_TOO_MANY_REQUESTS_MIN, status: 429 };
-    }
+		if (minuteRequests[userNameKey] > allowedAmountOfRequestsForIpPerMinute) {
+			await blockAndLogUser(req, db, {
+				requestsPerMinute: minuteRequests[userNameKey],
+			});
+			throw { message: ERR_TOO_MANY_REQUESTS_MIN, status: 429 };
+		}
 
-    if (fullDayRequests[userNameKey] > allowedAmountOfRequestsForIpPerFullDay) {
-      await blockAndLogUser(req, db, { requestsPerDay: fullDayRequests[userNameKey] });
-      throw { message: ERR_TOO_MANY_REQUESTS_DAY, status: 429 };
-    }
+		if (fullDayRequests[userNameKey] > allowedAmountOfRequestsForIpPerFullDay) {
+			await blockAndLogUser(req, db, {
+				requestsPerDay: fullDayRequests[userNameKey],
+			});
+			throw { message: ERR_TOO_MANY_REQUESTS_DAY, status: 429 };
+		}
 
-    next();
-  } catch (err) {
-    res.createErrorLogAndSend({
-      message: err.message,
-      status: err.status || 429
-    });
-  }
+		next();
+	} catch (err) {
+		res.createErrorLogAndSend({
+			message: err.message,
+			status: err.status || 429,
+		});
+	}
 };
 
 export default userRequestRateLimiter;
-
 
 // import config from '../config';
 // import cron from "node-cron";
@@ -137,7 +147,7 @@ export default userRequestRateLimiter;
 //     }
 //   });
 //   await createSingleLog(db,req, `User: ${req.user.user_name},per_minutes:${current_request_amount_per_minutes},per_day:${current_request_amount_per_day}` );
-// } 
+// }
 // const shouldCheck = true;
 
 // const userReqAmountCheckMiddleware = (db) => async (req, res, next) => {
