@@ -2,7 +2,7 @@
 // require('dotenv').config();
 
 import Logger from '../utils/Logger';
-
+console.log('at index.js process.env.NODE_ENV', process.env.NODE_ENV);
 const mode = process.env.NODE_ENV || 'development';
 Logger.debug(`Server is running in  ${mode} mode`);
 
@@ -13,9 +13,9 @@ if (process.env.NODE_ENV !== 'production') {
 
 const baseConfig = {
 	database: {
-	host: process.env.MY_SQL_HOST,
-	user: process.env.MY_SQL_USER,
-	password: process.env.MY_SQL_PASSWORD,
+	MY_SQL_HOST: process.env.MY_SQL_HOST,
+	MY_SQL_USER: process.env.MY_SQL_USER,
+	MY_SQL_PASSWORD: process.env.MY_SQL_PASSWORD,
 	DB: 'commissaire',
 	dialect: 'mysql',
 	pool: {
