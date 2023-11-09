@@ -40,9 +40,14 @@ export const confirmConfirmationCode = (
 	);
 };
 
-export const createToken = (user_name,user_role=null) => {
+export const createToken = (user_name, user_role = null) => {
 	const token = jwt.sign(
-		{ user_name: user_name, last_login: moment(),free:false,user_role:user_role },
+		{
+			user_name: user_name,
+			last_login: moment(),
+			free: false,
+			user_role: user_role,
+		},
 		config.TOKEN_KEY,
 		{
 			expiresIn: `${config.tokenExpireDayLimit}d`,
@@ -51,28 +56,19 @@ export const createToken = (user_name,user_role=null) => {
 	return token;
 };
 export const generateToken = (payload) => {
-	const token = jwt.sign(
-		payload,
-		config.TOKEN_KEY,
-		{
-			expiresIn: `${config.tokenExpireDayLimit}d`,
-		},
-	);
+	const token = jwt.sign(payload, config.TOKEN_KEY, {
+		expiresIn: `${config.tokenExpireDayLimit}d`,
+	});
 	return token;
 };
-
-
-
-
-
 
 export const getTokenFromReq = (req) => {
 	return req.body.token || req.query.token || req.headers['token'];
 };
 
 export const getEnv = () => {
-	return process.env.MODE ;
-	return process.env.MODE || 'development';//for local dev by pass login
+	return process.env.MODE;
+	return process.env.MODE || 'development'; //for local dev by pass login
 };
 
 export const getFixedPhoneNumber = (phoneNumber) => {

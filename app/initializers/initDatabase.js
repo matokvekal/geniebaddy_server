@@ -8,7 +8,7 @@ export default async (config) => {
 	console.log('config.database.USER', config.database.MY_SQL_USER || process.env.MY_SQL_USER);
 	console.log('config.database.PASSWORD', config.database.MY_SQL_PASSWORD||process.env.MY_SQL_PASSWORD);
 	const sequelize = new Sequelize(
-		config.database.NAME,
+		config.database.DB_NAME,
 		config.database.USER ||process.env.MY_SQL_USER,
 		config.database.PASSWORD || process.env.MY_SQL_PASSWORD,
 		{

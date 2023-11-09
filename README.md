@@ -41,16 +41,21 @@ run:
 npm i in the projects
 
 ## 5. Install and Configure PM2 RUN NODE
+npm install pm2@latest -g
 
-sudo npm install pm2 -g
+npm install esm
+npm cache clean --force
+rm -rf node_modules package-lock.json
+npm install
+
 
 ```
-pm2 start ./app/index.js --node-args="-r esm" --name server-dev
 
-```
+pm2 start ./app/index.js --node-args="-r esm" --name server-prod
 
-Configure PM2 to automatically startup the process after a reboot
-run pm2 startup
+run : pm2 startup
+
+
 you get:sudo env PATH=$PATH:/usr/bin /usr/local/lib/node_modules/pm2/bin/pm2 startup systemd -u ubuntu --hp /home/ubuntu
 
 copy and paste into the terminal > enter

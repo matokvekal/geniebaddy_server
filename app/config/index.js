@@ -15,7 +15,7 @@ const baseConfig = {
 		MY_SQL_HOST: process.env.MY_SQL_HOST,
 		MY_SQL_USER: process.env.MY_SQL_USER,
 		MY_SQL_PASSWORD: process.env.MY_SQL_PASSWORD,
-		DB: 'commissaire',
+		DB_NAME: 'commissaire',
 		dialect: 'mysql',
 		pool: {
 			max: 5,
@@ -36,18 +36,6 @@ const baseConfig = {
 				'https://localhost:5000',
 				'http://localhost:5000',
 		  ],
-	TOKEN_KEY: process.env.COMMISSAIRE_TOKEN_KEY,
-};
-
-const configByEnv = {
-	development: {
-		...baseConfig,
-		mode: 'development',
-	},
-	production: {
-		...baseConfig,
-		mode: 'production',
-	},
 	TOKEN_KEY: 'GENIEBADDYATOKENPROD',
 	confirmationCodeLimit: 5,
 	tokenExpireDayLimit: 360,
@@ -61,6 +49,18 @@ const configByEnv = {
 	googlePhonenumber: '111111',
 	gmailUserName: '1@gmail.com',
 	gmailPassword: '11111',
+	// TOKEN_KEY: process.env.COMMISSAIRE_TOKEN_KEY,
+};
+
+const configByEnv = {
+	development: {
+		...baseConfig,
+		mode: 'development',
+	},
+	production: {
+		...baseConfig,
+		mode: 'production',
+	},
 };
 
 export default configByEnv[mode];
