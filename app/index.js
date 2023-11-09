@@ -7,6 +7,7 @@ import Logger from './utils/Logger';
 const morgan = require('morgan');
 var accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' })
 
+console.log('at index.js process.env',process.env, process.env.NODE_ENV);
 InitServer(config).then((app) => {
   app.use(morgan('combined', { stream: accessLogStream }))
   // Initialize application server

@@ -8,11 +8,11 @@
     "start:local": "onchange \"app/**/*\" -i -k -- node -r esm ./app/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prestart:dev": "pm2 stop server-dev 2> /dev/null || true",
-    "start:dev": "MODE=development pm2 start ./app/index.js --node-args=\"-r esm\" --name=server-dev",
+    "start:dev": " pm2 start ./app/index.js --node-args=\"-r esm\" --name=server-dev",
     "prestart:preprod": "pm2 stop server-preprod 2> /dev/null || true",
-    "start:preprod": "MODE=preprod pm2 start ./app/index.js --node-args=\"-r esm\" --name=server-preprod",
+    "start:preprod": "pm2 start ./app/index.js --node-args=\"-r esm\" --name=server-preprod",
     "prestart:prod": "pm2 stop server-prod 2> /dev/null || true",
-    "start:prod": "MODE=production pm2 start ./app/index.js --node-args=\"-r esm\" --name=server-prod"
+    "start:prod": "pm2 start ./app/index.js --node-args=\"-r esm\" --name=server-prod"
   },
   "keywords": [
     "nodejs",

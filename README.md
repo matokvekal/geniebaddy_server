@@ -1,4 +1,4 @@
-# Deploying GenieBaddy  stack on Ubuntu 20.04
+# Deploying GenieBaddy stack on Ubuntu 20.04
 
 > Detailed step by step procedure to deploying PERN(mysql, Express, React, Node) stack on Ubuntu 20.04 with NGINX and SSL
 
@@ -10,43 +10,42 @@ save the .pem at c://.ssh
 connect :
 
 ssh -i "c://program Files/.ssh/commisaire-2023.pem" ubuntu@ec2-3-67-113-2.eu-central-1.compute.amazonaws.com
- sudo apt update
+sudo apt update
 sudo apt upgrade -y
 
 ## 3. Copy github repo to sever
+
 mkdir apps
 cd apps
 mkdir genieBaddy
 cd genieBaddy
 
 create key at linux:
- ssh-keygen -t genieKey -C "tipusharim@gmail.com"
+ssh-keygen -t genieKey -C "tipusharim@gmail.com"
 
 find the key at ~/.ssh
-copy the public to git 
+copy the public to git
 
-
- clone the project repo
+clone the project repo
 
 git clone git@github.com:matokvekal/geniebaddy_server.git
 
-
 ## 4. Install Node
+
 sudo apt update
 sudo apt install nodejs
 node -v
 sudo apt install npm
 npm -v
-run: 
-    npm i in the projects 
-
-
+run:
+npm i in the projects
 
 ## 5. Install and Configure PM2
 
 sudo npm install pm2 -g
+
 ```
-MODE=development pm2 start ./app/index.js --node-args="-r esm" --name server-dev
+pm2 start ./app/index.js --node-args="-r esm" --name server-dev
 
 ```
 
@@ -54,20 +53,21 @@ Configure PM2 to automatically startup the process after a reboot
 run pm2 startup
 you get:sudo env PATH=$PATH:/usr/bin /usr/local/lib/node_modules/pm2/bin/pm2 startup systemd -u ubuntu --hp /home/ubuntu
 
-copy and paste into the terminal  > enter
+copy and paste into the terminal > enter
 then:
 pm2 save
-
 
 Verify that the App is running
 
 ```
 pm2 status
 ```
+
 /////////////
 
 ## 6. Deploy React Frontend
-Navigate to the client directory in our App code and run `npm run build`. 
+
+Navigate to the client directory in our App code and run `npm run build`.
 
 This will create a finalized production ready version of our react frontent in directory called `build`. The build folder is what the NGINX server will be configured to serve.
 
@@ -81,30 +81,31 @@ ubuntu@ip-172-31-20-1:~/apps/yelp-app/client/build$
 ```
 
 ## . Configure Environment Variables
+
 for test:
-        export TEST="hello"
-        printenv
-        printenv | grep -i test
-        unset TEST
- ========================       
+export TEST="hello"
+printenv
+printenv | grep -i test
+unset TEST
+========================  
 at ~ create .env file with all env variable
-
-
 
 Create a file called `.env` in `/home/ubuntu/`. The file does not need to be named `.env` and it does not need to be stored in `/home/ubuntu`, these were just the name/location of my choosing. The only thing I recommend avoid doing is placing the file in the same directory as the app code as we want to make sure we don't accidentally check our environment variables into git and end up exposing our credentials.
 
- .env file 
+.env file
+
 ```
 PORT=3001
 PGUSER=postgres
 PGHOST=localhost
 PGPASSWORD=password123
 PGDATABASE=yelp
-PGPORT=5432 
+PGPORT=5432
 NODE_ENV=production
 ```
 
 set -o allexport; source /home/ubuntu/.env; set +o allexport
+
 ```
 printenv
 
@@ -116,8 +117,10 @@ add:  set -o allexport; source /home/ubuntu/.env; set +o allexport to end
 
 Install and enable NGINX
 ```
+
 sudo apt install nginx -y
 sudo systemctl enable nginx
+
 ```
 
 NGINX is a feature-rich webserver that can serve multiple websites/web-apps on one machine. Each website that NGINX is responsible for serving needs to have a seperate server block configured for it.
@@ -125,30 +128,37 @@ NGINX is a feature-rich webserver that can serve multiple websites/web-apps on o
 Navigate to '/etc/nginx/sites-available'
 
 ```
+
 cd /etc/nginx/sites-available
+
 ```
 
 There should be a server block called `default`
 
 ```
+
 ubuntu@ip-172-31-20-1:/etc/nginx/sites-available$ ls
-default 
+default
+
 ```
-The default server block is what will be responsible for handling requests that don't match any other server blocks. Right now if you navigate to your server ip, you will see a pretty bland html page that says NGINX is installed. That is the `default` server block in action. 
+The default server block is what will be responsible for handling requests that don't match any other server blocks. Right now if you navigate to your server ip, you will see a pretty bland html page that says NGINX is installed. That is the `default` server block in action.
 
 We will need to configure a new server block for our website. To do that let's create a new file in `/etc/nginx/sites-available/` directory. We can call this file whatever you want, but I recommend that you name it the same name as your domain name for your app. In this example my website will be hosted at *sanjeev.xyz* so I will also name the new file `sanjeev.xyz`. But instead of creating a brand new file, since most of the configs will be fairly similar to the `default` server block, I recommend copying the `default` config.
 
 ```
+
 cd /etc/nginx/sites-available
 sudo cp default sanjeev.xyz
+
 ```
 
 open the new server block file `sanjeev.xyz` and modify it so it matches below:
 
 ```
+
 server {
-        listen 80;
-        listen [::]:80;
+listen 80;
+listen [::]:80;
 
          root /home/ubuntu/apps/yelp-app/client/build;
 
@@ -171,6 +181,7 @@ server {
         }
 
 }
+
 ```
 
 **Let's go over what each line does**
@@ -184,29 +195,35 @@ The first two lines `listen 80` and `listen [::]:80;` tell nginx to listen for t
 The configuration block below is needed due to the fact that React is a Singe-Page-App. So if a user directly goes to a url that is not the root url like `https://sanjeev.xyz/restaurants/4` you will get a 404 cause NGINX has not been configured to handle any path ohter than the `/`. This config block tells nginx to redirect everything back to the `/` path so that react can then handle the routing.
 
 ```
+
         location / {
                 try_files $uri /index.html;
         }
+
 ```
 
 The last section is so that nginx can handle traffic destined to the backend. Notice the location is for `/api`. So any url with a path of `/api` will automatically follow the instructions associated with this config block. The first line in the config block `proxy_pass http://localhost:3001;` tells nginx to redirect it to the localhost on port 3001 which is the port that our backend process is running on. This is how traffic gets forwarded to the Node backend. If you are using a different port, make sure to update that in this line.
 
 **Enable the new site**
 ```
+
 sudo ln -s /etc/nginx/sites-available/sanjeev.xyz /etc/nginx/sites-enabled/
 systemctl restart nginx
+
 ```
 
 
 ## 9. Enable Firewall
 
 ```
+
 sudo ufw status
 sudo ufw allow ssh
 sudo ufw allow http
 sudo ufw allow https
 sudo ufw enable
 sudo ufw status
+
 ```
 
 ## 10. Enable SSL with Let's Encrypt
@@ -219,20 +236,27 @@ https://certbot.eff.org/lets-encrypt/ubuntufocal-nginx.html
 Install Certbot
 
 ```
+
 sudo snap install --classic certbot
+
 ```
 
 Prepare the Certbot command
 
 ```
+
 sudo ln -s /snap/bin/certbot /usr/bin/certbot
+
 ```
 
 Get and install certificates using interactive prompt
 
 ```
+
 sudo certbot --nginx
+
 ```
 
 ## Authors
 * **Sanjeev Thiyagarajan** - *CEO of Nothing*
+```
