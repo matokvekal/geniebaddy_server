@@ -40,7 +40,7 @@ npm -v
 run:
 npm i in the projects
 
-## 5. Install and Configure PM2
+## 5. Install and Configure PM2 RUN NODE
 
 sudo npm install pm2 -g
 

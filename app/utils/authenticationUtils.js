@@ -70,10 +70,10 @@ export const getTokenFromReq = (req) => {
 	return req.body.token || req.query.token || req.headers['token'];
 };
 
-// export const getEnv = () => {
-// 	return process.env.MODE ;
-// 	return process.env.MODE || 'development';//for local dev by pass login
-// };
+export const getEnv = () => {
+	return process.env.MODE ;
+	return process.env.MODE || 'development';//for local dev by pass login
+};
 
 export const getFixedPhoneNumber = (phoneNumber) => {
 	return phoneNumber && phoneNumber[3] === '0'

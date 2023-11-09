@@ -5,7 +5,7 @@ import config from "../config";
 // Only set specific origins in production; for development, you can allow all
 const corsOptions = {
   credentials: true,
-  origin: process.env.NODE_ENV === 'production' ? config.allowedOrigins.split(',') : '*',
+  origin: process.env.NODE_ENV === 'production' ? config.allowedOrigins : '*',
 };
 
 const middlewares = [

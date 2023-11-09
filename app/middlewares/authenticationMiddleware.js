@@ -76,7 +76,7 @@ const authenticationMiddleware = (db) => async (req, res, next) => {
 	const canBypass = await bypass(req, db);
 	if (canBypass) {
 		req.canBypass = true;
-	return next();
+		return next();
 	}
 
 	let token = req.headers.authorization;
@@ -146,7 +146,7 @@ const authenticationMiddleware = (db) => async (req, res, next) => {
 				return next();
 			}
 		}
-	}else {
+	} else {
 		return await res.createErrorLogAndSend({
 			message: ServerLoginMessages.TOKEN_REQUIRED,
 			status: 403,
