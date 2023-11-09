@@ -1,19 +1,20 @@
 import Sequelize from 'sequelize';
 import Logger from '../utils/Logger';
 import initDatabaseModels from './initDatabaseModels'
+import env from '../../env.json';
 
 export default async (config) => {
 	console.log('config.database.NAME', config.database.NAME);
 	//log  db host,user,password,name
-	console.log('config.database.HOST', config.database.HOST);
-	console.log('config.database.USER', config.database.USER);
-	console.log('config.database.PASSWORD', config.database.PASSWORD);
+	console.log('config.database.HOST', config.database.HOST||env.MY_SQL_HOST);
+	console.log('config.database.USER', config.database.USER || env.MY_SQL_USER);
+	console.log('config.database.PASSWORD', config.database.PASSWORD||env.MY_SQL_PASSWORD);
 	const sequelize = new Sequelize(
 		config.database.NAME,
-		config.database.USER,
-		config.database.PASSWORD,
+		config.database.USER ||env.MY_SQL_USER,
+		config.database.PASSWORD || env.MY_SQL_PASSWORD,
 		{
-			host: config.database.HOST,
+			host: config.database.HOST||env.MY_SQL_HOST,
 			port: config.database.PORT,
 			dialect: config.database.dialect,
 			operatorsAliases: false,

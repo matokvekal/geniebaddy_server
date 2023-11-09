@@ -9,6 +9,7 @@ import momentTimeZone from 'moment-timezone';
 import rateLimit from 'express-rate-limit';
 // import { getFixedValueAndEqualSign } from '../utils/getFixedValues';
 momentTimeZone.tz.setDefault('Etc/UTC');
+import http from 'http'; 
 /**
  * Create all routes and middlewares
  * @returns {Promise<Application>}
@@ -17,8 +18,6 @@ const cors = require('cors');
 export default async (config) => {
 	console.log('init server');
 	const app = express();
-	const adminRouter = express.Router();
-	const publicRouter = express.Router();
 	const GbRouter = express.Router();
 	const db = await initDatabase(config);
 	const limiter = rateLimit({
@@ -54,13 +53,12 @@ export default async (config) => {
 				'http://localhost:3001',
 				'https://localhost:5000',
 				'http://localhost:5000',
-				// 'http://genieclient.s3-website.eu-central-1.amazonaws.com',
-				// 'https://genieclient.s3-website.eu-central-1.amazonaws.com:5000',
-			], // (Whatever your frontend url is)
+			], 
 			methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
 			credentials: true, // <= Accept credentials (cookies) sent by the client
 		}),
 	);
+	// const httpsServer = http.createServer(httpsOptions, app);
 
 	// const allowedPublicConfigObject = {
 	// 	//list of controllers

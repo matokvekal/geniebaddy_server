@@ -1,4 +1,4 @@
-const { Op } = require("sequelize");
+
 
 module.exports = function (db) {
   return {

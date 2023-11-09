@@ -16,7 +16,3 @@ const middlewares = [
 export default middlewares;
 
 
-// app.use(cors({
-//     origin : ['http://localhost','https://localhost', 'http://212.80.207.146','http://localhost:3000', 'https://212.80.207.146','https://localhost:3000'],// (Whatever your frontend url is)
-//     credentials: true // <= Accept credentials (cookies) sent by the client
-//   }));
