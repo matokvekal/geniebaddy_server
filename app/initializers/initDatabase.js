@@ -12,7 +12,7 @@ export default async (config) => {
 		config.database.USER ||process.env.MY_SQL_USER,
 		config.database.PASSWORD || process.env.MY_SQL_PASSWORD,
 		{
-			host: config.database.HOST||process.env.MY_SQL_HOST,
+			host: config.database.MY_SQL_HOST||process.env.MY_SQL_HOST,
 			port: config.database.PORT,
 			dialect: config.database.dialect,
 			operatorsAliases: false,

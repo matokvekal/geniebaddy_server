@@ -82,17 +82,20 @@ ubuntu@ip-172-31-20-1:~/apps/yelp-app/client/build$
 
 ## . Configure Environment Variables
 
-for test:
-export TEST="hello"
-printenv
-printenv | grep -i test
-unset TEST
+we can use this :
+
+export NODE_ENV=production
+export MY_SQL_HOST=dbcommiss.....
+export MY_SQL_USER=a...
+export MY_SQL_PASSWORD=za....
+export DOMAIN=www.commi..
+
+then run :source .env
+
 ========================  
 at ~ create .env file with all env variable
 
-Create a file called `.env` in `/home/ubuntu/`. The file does not need to be named `.env` and it does not need to be stored in `/home/ubuntu`, these were just the name/location of my choosing. The only thing I recommend avoid doing is placing the file in the same directory as the app code as we want to make sure we don't accidentally check our environment variables into git and end up exposing our credentials.
-
-.env file
+Create a file called `.env` in `/home/ubuntu/`. The file does not need to be named `.env` and it does not need to be stored in `/home/ubuntu`
 
 ```
 PORT=3001
@@ -108,7 +111,7 @@ set -o allexport; source /home/ubuntu/.env; set +o allexport
 
 ```
 printenv
-
+to use it after system upload  do:
 open .profile
 add:  set -o allexport; source /home/ubuntu/.env; set +o allexport to end
 
