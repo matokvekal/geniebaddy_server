@@ -3,7 +3,7 @@
 
 import Logger from '../utils/Logger';
 
-const mode = process.env.ENV || 'development';
+const mode = process.env.NODE_ENV || 'development';
 Logger.debug(`Server is running in  ${mode} mode`);
 
 if (process.env.NODE_ENV !== 'production') {

@@ -51,29 +51,20 @@ MODE=development pm2 start ./app/index.js --node-args="-r esm" --name server-dev
 ```
 
 Configure PM2 to automatically startup the process after a reboot
-//////////////////////////////////
-```
-ubuntu@ip-172-31-20-1:~$ pm2 startup
-[PM2] Init System found: systemd
-[PM2] To setup the Startup Script, copy/paste the following command:
-sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u ubuntu --hp /home/ubuntu
-```
-The output above gives you a specific command to run, copy and paste it into the terminal. The command given will be different on your machine depending on the username, so do not copy the output above, instead run the command that is given in your output.
+run pm2 startup
+you get:sudo env PATH=$PATH:/usr/bin /usr/local/lib/node_modules/pm2/bin/pm2 startup systemd -u ubuntu --hp /home/ubuntu
 
-```
-sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u ubuntu --hp /home/ubuntu
-```
+copy and paste into the terminal  > enter
+then:
+pm2 save
+
 
 Verify that the App is running
 
 ```
 pm2 status
 ```
-After verify App is running, save the current list of processes so that the same processes are started during bootup. If the list of processes ever changes in the future, you'll want to do another `pm2 save`
-
-```
-pm2 save
-```
+/////////////
 
 ## 6. Deploy React Frontend
 Navigate to the client directory in our App code and run `npm run build`. 
@@ -88,6 +79,38 @@ ubuntu@ip-172-31-20-1:~/apps/yelp-app/client/build$ ls
 asset-manifest.json  favicon.ico  index.html  logo192.png  logo512.png  manifest.json  precache-manifest.ee13f4c95d9882a5229da70669bb264c.js  robots.txt  service-worker.js  static
 ubuntu@ip-172-31-20-1:~/apps/yelp-app/client/build$
 ```
+
+## . Configure Environment Variables
+for test:
+        export TEST="hello"
+        printenv
+        printenv | grep -i test
+        unset TEST
+ ========================       
+at ~ create .env file with all env variable
+
+
+
+Create a file called `.env` in `/home/ubuntu/`. The file does not need to be named `.env` and it does not need to be stored in `/home/ubuntu`, these were just the name/location of my choosing. The only thing I recommend avoid doing is placing the file in the same directory as the app code as we want to make sure we don't accidentally check our environment variables into git and end up exposing our credentials.
+
+ .env file 
+```
+PORT=3001
+PGUSER=postgres
+PGHOST=localhost
+PGPASSWORD=password123
+PGDATABASE=yelp
+PGPORT=5432 
+NODE_ENV=production
+```
+
+set -o allexport; source /home/ubuntu/.env; set +o allexport
+```
+printenv
+
+open .profile
+add:  set -o allexport; source /home/ubuntu/.env; set +o allexport to end
+
 
 ## 7. Install and Configure NGINX
 
@@ -174,39 +197,6 @@ sudo ln -s /etc/nginx/sites-available/sanjeev.xyz /etc/nginx/sites-enabled/
 systemctl restart nginx
 ```
 
-## 8. Configure Environment Variables
-We now need to make sure that all of the proper environment variables are setup on our production Ubuntu Server. In our development environment, we made use of a package called dotenv to load up environment variables. In the production environment the environment variables are going to be set on the OS instead of within Node. 
-
-Create a file called `.env` in `/home/ubuntu/`. The file does not need to be named `.env` and it does not need to be stored in `/home/ubuntu`, these were just the name/location of my choosing. The only thing I recommend avoid doing is placing the file in the same directory as the app code as we want to make sure we don't accidentally check our environment variables into git and end up exposing our credentials.
-
-Within the .env file paste all the required environment variables
-
-```
-PORT=3001
-PGUSER=postgres
-PGHOST=localhost
-PGPASSWORD=password123
-PGDATABASE=yelp
-PGPORT=5432 
-NODE_ENV=production
-```
-
-You'll notice I also set `NODE_ENV=production`. Although its not required for this example project, it is common practice. For man other projects(depending on how the backend is setup) they may require this to be set in a production environment.
-
-
-In the `/home/ubuntu/.profile` add the following line to the bottom of the file
-
-```
-set -o allexport; source /home/ubuntu/.env; set +o allexport
-```
-
-For these changes to take affect, close the current terminal session and open a new one. 
-
-Verify that the environment variables are set by running the `printenv`
-
-```
-# printenv
-```
 
 ## 9. Enable Firewall
 
