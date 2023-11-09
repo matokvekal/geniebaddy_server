@@ -29,7 +29,7 @@ class AuthController extends BaseController {
 	// POST /api/gb/login
 	login = async (req, res) => {
 		try {
-			console.log('login');
+			console.log('at login');
 			let userResult;
 			let user_name;
 			const { phoneNumber, email, password, user_role } = req.body;

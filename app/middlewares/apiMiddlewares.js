@@ -1,18 +1,17 @@
 import express from 'express';
 import cors from 'cors';
-//import Parsing from './payloadParsing';
-// import checkAuthentication from './authenticationMiddleware';
 import config from "../config";
 
-const origin = config.allowedOrigins.split(',');
-console.log("api middleware",origin);
-const middlewares = [
-    cors({ credentials: true, origin:"*" }),
-    express.urlencoded({ extended: true }),
-    express.json(),
+// Only set specific origins in production; for development, you can allow all
+const corsOptions = {
+  credentials: true,
+  origin: process.env.NODE_ENV === 'production' ? config.allowedOrigins.split(',') : '*',
+};
 
+const middlewares = [
+  cors(corsOptions),
+  express.urlencoded({ extended: true }),
+  express.json(),
 ];
 
 export default middlewares;
-
-

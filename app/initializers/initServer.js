@@ -42,22 +42,22 @@ export default async (config) => {
 	);
 	initGbRoutes(GbRouter, app);
 
-	app.use(
-		cors({
-			origin: [
-				'http://localhost',
-				'https://localhost',
-				'http://3.79.151.83:5000',
-				'https://3.79.151.83:5000',
-				'http://localhost:3000',
-				'http://localhost:3001',
-				'https://localhost:5000',
-				'http://localhost:5000',
-			], 
-			methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-			credentials: true, // <= Accept credentials (cookies) sent by the client
-		}),
-	);
+	// app.use(
+	// 	cors({
+	// 		origin: [
+	// 			'http://localhost',
+	// 			'https://localhost',
+	// 			'http://3.79.151.83:5000',
+	// 			'https://3.79.151.83:5000',
+	// 			'http://localhost:3000',
+	// 			'http://localhost:3001',
+	// 			'https://localhost:5000',
+	// 			'http://localhost:5000',
+	// 		], 
+	// 		methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+	// 		credentials: true, // <= Accept credentials (cookies) sent by the client
+	// 	}),
+	// );
 	// const httpsServer = http.createServer(httpsOptions, app);
 
 	// const allowedPublicConfigObject = {

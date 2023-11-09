@@ -1,5 +1,5 @@
 {
-    "currentLanguage": "he",
+    "CURRENTLANGUAGE": "he",
     "maxFileSize":"5000000",
     "maxFileNameSize":"45",
     "rowsinChank":"200",

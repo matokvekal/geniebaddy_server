@@ -19,35 +19,39 @@ cd apps
 mkdir genieBaddy
 cd genieBaddy
 
+create key at linux:
+ ssh-keygen -t genieKey -C "tipusharim@gmail.com"
+
+find the key at ~/.ssh
+copy the public to git 
+
 
  clone the project repo
-```
-cd yelp-app
-git clone https://github.com/Sanjeev-Thiyagarajan/PERN-STACK-DEPLOYMENT.git .
-```
+
+git clone git@github.com:matokvekal/geniebaddy_server.git
+
 
 ## 4. Install Node
-To install Node on Ubuntu follow the steps detailed in:
-https://github.com/nodesource/distributions/blob/master/README.md
+sudo apt update
+sudo apt install nodejs
+node -v
+sudo apt install npm
+npm -v
+run: 
+    npm i in the projects 
 
-```
-curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
-sudo apt-get install -y nodejs
-```
+
 
 ## 5. Install and Configure PM2
-We never want to run *node* directly in production. Instead we want to use a process manager like PM2 to handle running our backend server. PM2 will be responsible for restarting the App if/when it crashes :grin:
 
-```
 sudo npm install pm2 -g
 ```
-Point pm2 to the location of the server.js file so it can start the app. We can add the `--name` flag to give the process a descriptive name
-```
-pm2 start /home/ubuntu/apps/yelp-app/server/server.js --name yelp-app
+MODE=development pm2 start ./app/index.js --node-args="-r esm" --name server-dev
+
 ```
 
 Configure PM2 to automatically startup the process after a reboot
-
+//////////////////////////////////
 ```
 ubuntu@ip-172-31-20-1:~$ pm2 startup
 [PM2] Init System found: systemd

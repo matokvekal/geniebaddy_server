@@ -1,20 +1,18 @@
 import Sequelize from 'sequelize';
 import Logger from '../utils/Logger';
 import initDatabaseModels from './initDatabaseModels'
-import env from '../../env.json';
+
 
 export default async (config) => {
-	console.log('config.database.NAME', config.database.NAME);
-	//log  db host,user,password,name
-	console.log('config.database.HOST', config.database.HOST||env.MY_SQL_HOST);
-	console.log('config.database.USER', config.database.USER || env.MY_SQL_USER);
-	console.log('config.database.PASSWORD', config.database.PASSWORD||env.MY_SQL_PASSWORD);
+	console.log('config.database.HOST', config.database.MY_SQL_HOST||process.env.MY_SQL_HOST);
+	console.log('config.database.USER', config.database.MY_SQL_USER || process.env.MY_SQL_USER);
+	console.log('config.database.PASSWORD', config.database.MY_SQL_PASSWORD||process.env.MY_SQL_PASSWORD);
 	const sequelize = new Sequelize(
 		config.database.NAME,
-		config.database.USER ||env.MY_SQL_USER,
-		config.database.PASSWORD || env.MY_SQL_PASSWORD,
+		config.database.USER ||process.env.MY_SQL_USER,
+		config.database.PASSWORD || process.env.MY_SQL_PASSWORD,
 		{
-			host: config.database.HOST||env.MY_SQL_HOST,
+			host: config.database.HOST||process.env.MY_SQL_HOST,
 			port: config.database.PORT,
 			dialect: config.database.dialect,
 			operatorsAliases: false,
