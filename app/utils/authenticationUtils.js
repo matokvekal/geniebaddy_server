@@ -67,8 +67,7 @@ export const getTokenFromReq = (req) => {
 };
 
 export const getEnv = () => {
-	return process.env.MODE;
-	return process.env.MODE || 'development'; //for local dev by pass login
+	return process.env.MODE_ENV || 'development'; //for local dev by pass login
 };
 
 export const getFixedPhoneNumber = (phoneNumber) => {

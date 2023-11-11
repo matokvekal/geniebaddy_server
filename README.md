@@ -1,3 +1,4 @@
+https://www.youtube.com/watch?v=NjYsXuSBZ5U
 # Deploying GenieBaddy stack on Ubuntu 20.04
 
 > Detailed step by step procedure to deploying PERN(mysql, Express, React, Node) stack on Ubuntu 20.04 with NGINX and SSL
@@ -121,32 +122,77 @@ open .profile
 add:  set -o allexport; source /home/ubuntu/.env; set +o allexport to end
 
 
-## 7. Install and Configure NGINX
 
-Install and enable NGINX
-```
+## 7. install front end code , 
+git pull npm  i
+npm run build
+## 8.NGINX
+
+
 
 sudo apt install nginx -y
 sudo systemctl enable nginx
-
+systemctl status nginx
 ```
+Go AWS
+select instance
+at browser run the instance  public ip -3.67.113.2
 
-NGINX is a feature-rich webserver that can serve multiple websites/web-apps on one machine. Each website that NGINX is responsible for serving needs to have a seperate server block configured for it.
+go to security group and fix 80  and 443
 
-Navigate to '/etc/nginx/sites-available'
-
-```
-
+go to 
 cd /etc/nginx/sites-available
 
+
+There should be a server block called `default` 
+
+buy domain  for examplw namecheep
+copy default file to domain name :
+sudo cp default  commissaire.us
+
+at root  change to the client build path
+
+/home/ubuntu/apps/client/build
+
+at server name add the domain name: with www  if no domain write the ip
+        server_name commissaire.us www.commissaire.us 3.67.113.2;
+
+add link  
+sudo ln -s /etc/nginx/sites-available/commissaire.us /etc/nginx/sites-enabled/
+
+run 
+sudo systemctl restart nginx
+
+check the ip on the browser      https://commissaire.us/loginuser
 ```
+update the file :
+server {
+        listen 80 ;
+        listen [::]:80;
+        root /home/ubuntu/apps/client/build;
 
-There should be a server block called `default`
+        # Add index.php to the list if you are using PHP
+        index index.html index.htm index.nginx-debian.html;
 
-```
+        server_name commissaire.us www.commissaire.us 3.67.113.2;
 
-ubuntu@ip-172-31-20-1:/etc/nginx/sites-available$ ls
-default
+            location /api {
+            proxy_pass http://localhost:5000;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_cache_bypass $http_upgrade;
+        }
+
+sudo systemctl restart nginx
+
+ad the file:(need for react apps)
+       location / {
+                try_files $uri /index.html;
+        }
+
+
 
 ```
 The default server block is what will be responsible for handling requests that don't match any other server blocks. Right now if you navigate to your server ip, you will see a pretty bland html page that says NGINX is installed. That is the `default` server block in action.
