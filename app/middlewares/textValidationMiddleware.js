@@ -15,10 +15,10 @@ const fieldsAllowSomeSigns = ['mobile', 'phone', 'branch'];
 
 // Define length limits for different fields
 const lengthLimits = {
-    default: 50,
-    long: 200000,
-    medium: 75,
-    short: 70
+    default: 3000,
+    long: 8000,
+    medium: 4000,
+    short: 2000
 };
 
 // Define which fields adhere to which length limits

@@ -80,7 +80,7 @@ class AuthenticationController extends BaseController {
 					SQL = `UPDATE users set last_login="${moment().format(
 						'YYYY-MM-DD HH:mm:ss',
 					)}",token="${token}"  WHERE user_name like  '${fixed_email}' `;
-					console.log('SQL', SQL);
+					// console.log('SQL', SQL);
 					userResult = await this.sequelize.query(SQL, {
 						type: QueryTypes.UPDATE,
 					});
@@ -233,7 +233,7 @@ class AuthenticationController extends BaseController {
 	'0' ,
 	'${moment().format('YYYY-MM-DD HH:mm:ss')}')`;
 
-					console.log(SQL);
+					// console.log(SQL);
 					const response = await this.sequelize.query(SQL, {
 						type: QueryTypes.SELECT,
 					});
@@ -376,7 +376,7 @@ class AuthenticationController extends BaseController {
 				  )
 				`;
 					}
-					console.log('SQL', SQL);
+					// console.log('SQL', SQL);
 					await this.sequelize.query(SQL, {
 						type: QueryTypes.INSERT,
 					});

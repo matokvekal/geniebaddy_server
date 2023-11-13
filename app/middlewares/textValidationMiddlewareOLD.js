@@ -74,9 +74,9 @@ const fieldsToCheckLevel2 = [ 'mobile', 'phone','branch']; // array of fields th
 
 // LENGTH LEVELS
   
-const lengthLevel1 = 200000;
-const lengthLevel2 = 75;
-const lengthLevel3 = 70;
+const lengthLevel1 = 4000;
+const lengthLevel2 = 6000;
+const lengthLevel3 = 8000;
 const lengthLevel1Array = ['fire_base_token', 'customer_icon', 'image']; // allowed 200 characters
 const lengthLevel2Array = []; // allowed 75 characters
 // level 3 - allowed 50 characters

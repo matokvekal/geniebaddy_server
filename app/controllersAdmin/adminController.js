@@ -12,7 +12,7 @@ class AdminController extends BaseController {
 	constructor(app, modelName, sequelize) {
 		super(app, modelName, sequelize);
 	}
-  
+
 	// GET /api/admin/races
 	getRaces = async (req, res) => {
 		try {
@@ -106,7 +106,7 @@ class AdminController extends BaseController {
 		const meta = {};
 		meta.maxFileSize = config.maxFileSize || 5 * 1000000;
 		meta.response_count = 0;
-		meta.ownerId = req.owner_id ||996//GILAD AT TABLE USERS
+		meta.ownerId = req.owner_id || 996; //GILAD AT TABLE USERS
 		meta.raceDate = '';
 		meta.fileOriginName = '';
 		meta.sub_branch = '';
@@ -128,8 +128,8 @@ class AdminController extends BaseController {
 					res.status(500).send('Error some problem in file');
 				}
 				if (
-					(file.file.mimetype !== 'text/csv' && file.file.mimetype !=='text/plain')
-					||
+					(file.file.mimetype !== 'text/csv' &&
+						file.file.mimetype !== 'text/plain') ||
 					file.file.size > meta.maxFileSize ||
 					file.file.size === 0
 				) {
@@ -181,7 +181,9 @@ class AdminController extends BaseController {
 					(owner_id,branch,name,place,race_date,is_active,is_public,uploaded_file_name,temp_table_name,sub_branch,country,year)
 						values
 					(${meta.ownerId},"${meta.branch}","${meta.race_name}","${meta.place}","${meta.raceDate}",1,1,"${meta.fileOriginName}","${meta.fileName}","${meta.sub_branch}","${meta.country}","${meta.year}");`;
-						query(SQL,function (result, fields) {
+					query(
+						SQL,
+						function (result, fields) {
 							//3)create new temp table with the race data
 							console.log('finish 2 success insert to fields');
 						},
@@ -191,45 +193,49 @@ class AdminController extends BaseController {
 						},
 					);
 
-							SQL = `CREATE TABLE data_commissaire.${meta.fileName} (id INT NOT NULL AUTO_INCREMENT,createdAt DATETIME NULL DEFAULT now(),`;
-							let i = 1;
-							let temp=0;
-							let headerCounter=0;
-							headers.forEach((header) => {
-								headerCounter++;
-								if(!header || header===""){
-									header=`temp${temp++}`
-								}
-								header=header.trim();
-								header=header.split(' ').join('_');
-								header = header.replaceAll('.', '_');
-								header = header.replaceAll('%', '_');
-								header = header.replaceAll('#', '_');
-								header = header.replaceAll("'", '');
-								header = header.replaceAll("Rank", '_rank');
-								header=header.toLowerCase()==="rank"?"_rank":header;
-								headerToInsert=headerToInsert?`${headerToInsert}${header.trim()},`:`${header.trim()},`;
-								SQL = ` ${SQL} ${header.trim()} VARCHAR(120) NULL,`;
-							});
-							SQL = ` ${SQL} PRIMARY KEY (id))`;
-							// console.log(SQL)
-							query(
-								SQL, 
-								function (result, fields) {
-									//4)insert the race data to temp table 
-									console.log('finish 3 success create table');
-									let sqlStart = `INSERT INTO   data_commissaire.${meta.fileName} (`;
-									let sqlEnd = '(';
-									sqlStart = ` ${sqlStart}${headerToInsert.slice(0, -1)}) values `;
-									let chank = 700;
-									let columns;
-									lines.forEach((row, index) => {
-																							
-										if (index > 0) {
-											if (row.length > 0) {
-											columns = row.split(',');
-											if(columns.length===headerCounter){
-												if(columns[0]!==headers[0] && columns[1]!==headers[1]){
+					SQL = `CREATE TABLE data_commissaire.${meta.fileName} (id INT NOT NULL AUTO_INCREMENT,createdAt DATETIME NULL DEFAULT now(),`;
+					let i = 1;
+					let temp = 0;
+					let headerCounter = 0;
+					headers.forEach((header) => {
+						headerCounter++;
+						if (!header || header === '') {
+							header = `temp${temp++}`;
+						}
+						header = header.trim();
+						header = header.split(' ').join('_');
+						header = header.replaceAll('.', '_');
+						header = header.replaceAll('%', '_');
+						header = header.replaceAll('#', '_');
+						header = header.replaceAll("'", '');
+						header = header.replaceAll('Rank', '_rank');
+						header = header.toLowerCase() === 'rank' ? '_rank' : header;
+						headerToInsert = headerToInsert
+							? `${headerToInsert}${header.trim()},`
+							: `${header.trim()},`;
+						SQL = ` ${SQL} ${header.trim()} VARCHAR(120) NULL,`;
+					});
+					SQL = ` ${SQL} PRIMARY KEY (id))`;
+					// console.log(SQL)
+					query(
+						SQL,
+						function (result, fields) {
+							//4)insert the race data to temp table
+							console.log('finish 3 success create table');
+							let sqlStart = `INSERT INTO   data_commissaire.${meta.fileName} (`;
+							let sqlEnd = '(';
+							sqlStart = ` ${sqlStart}${headerToInsert.slice(0, -1)}) values `;
+							let chank = 700;
+							let columns;
+							lines.forEach((row, index) => {
+								if (index > 0) {
+									if (row.length > 0) {
+										columns = row.split(',');
+										if (columns.length === headerCounter) {
+											if (
+												columns[0] !== headers[0] &&
+												columns[1] !== headers[1]
+											) {
 												columns.forEach((column) => {
 													sqlEnd = `${sqlEnd}"${column
 														.replaceAll(',', ' ')
@@ -237,55 +243,70 @@ class AdminController extends BaseController {
 														.trim()}",`;
 												});
 												sqlEnd = `${sqlEnd.slice(0, -1)}),(`;
-											}} 
-											// else{
-											// 	todo  if less then add null
-											// 	if more the cut the extra
-											// }
-																													}
-											if (
-												(index !== 0 && index % chank === 0) ||
-												lines.length - 1 === index
-											) {
-												SQL = `${sqlStart} ${sqlEnd.slice(0, -2)}`;
-												sqlEnd = '(';
-												console.log('start 4 insert sql index:', index);
+											}
+										}
+										// else{
+										// 	todo  if less then add null
+										// 	if more the cut the extra
+										// }
+									}
+									if (
+										(index !== 0 && index % chank === 0) ||
+										lines.length - 1 === index
+									) {
+										SQL = `${sqlStart} ${sqlEnd.slice(0, -2)}`;
+										sqlEnd = '(';
+										console.log('start 4 insert sql index:', index);
+										// console.log(SQL);
+										query(
+											SQL,
+											function (result, fields) {
+												//5)insert the data from tem table to race_riders table
+												console.log('finish 4 insert sql index:', index);
+												SQL = `CALL insert_race_data("${meta.fileName}","${meta.country}",${meta.ownerId});`;
 												// console.log(SQL);
 												query(
 													SQL,
-													function (result, fields) {
-														//5)insert the data from tem table to race_riders table
-														console.log('finish 4 insert sql index:', index);
-														SQL = `CALL insert_race_data("${meta.fileName}","${meta.country}",${meta.ownerId});`;
-														// console.log(SQL);
-														query(SQL,function (appsresult, fields) {
-																console.log('finish 5 insert riders and categories',index,);
-																console.log('send ok  1');
-																res.status(200).send("uploaded");
-															},
-															function (err) {
-																console.log('send error 2');
-																res.status(500).send({ success: false, err });
-															},
+													function (appsresult, fields) {
+														console.log(
+															'finish 5 insert riders and categories',
+															index,
 														);
+														console.log('send ok  1');
+														res.status(200).send('uploaded');
 													},
-													function (err) {console.log('Error insert sql index:',index,'SQL:',SQL,	);
-													console.log('send error 3');
-														res.status(500).send(err,'Error -some problem in file, Hint remove extra comma!',
-															);
+													function (err) {
+														console.log('send error 2');
+														res.status(500).send({ success: false, err });
 													},
 												);
-											}
-										}
-										// res.send('finish')  
-									});
-								},
-								function (err) {
-									console.log('Error 5 at create table', err);
-									res.status(500).send(err, 'Error at create table');
-								},
-							);
-				
+											},
+											function (err) {
+												console.log(
+													'Error insert sql index:',
+													index,
+													'SQL:',
+													SQL,
+												);
+												console.log('send error 3');
+												res
+													.status(500)
+													.send(
+														err,
+														'Error -some problem in file, Hint remove extra comma!',
+													);
+											},
+										);
+									}
+								}
+								// res.send('finish')
+							});
+						},
+						function (err) {
+							console.log('Error 5 at create table', err);
+							res.status(500).send(err, 'Error at create table');
+						},
+					);
 				}
 			});
 			// res.send("finish");
@@ -383,7 +404,6 @@ class AdminController extends BaseController {
 		}
 	};
 
-
 	// getRaceRiders = async (req, res) => {
 	// 	const owner_id = 996;
 	// 	let race_id = req.query.race;
@@ -401,7 +421,7 @@ class AdminController extends BaseController {
 	// 	FROM race_riders
 	// 	where is_active=1 and race_id = ${race_id}
 	// 	${category_id ? ` and race_category_id = ${category_id}` : ''}
-	// 	and is_public=1  
+	// 	and is_public=1
 	// 	order by id`;
 	// 		//TODO if race not start then sort by rider bib number
 	// 		//console.log(SQL);
@@ -479,7 +499,6 @@ class AdminController extends BaseController {
 	// 		}
 
 	// 	let user_code = req.user_code;
-     
 
 	// 	const SQL=` CALL commissaire.update_cycling_active('${user_code}','${type}',
 	// 	'${nick_name}','${mobile}','${from}','${to}','${puncture}','${can_help}','${difribliator}','${first_aid}',
@@ -493,13 +512,11 @@ class AdminController extends BaseController {
 	// 	}else{
 	// 		return res.status(200).send({ success: true, message: 'config saved' });
 	// 	}
-	
+
 	// 	} catch (e) {
 	// 		console.log('Error at config');
 	// 		return res.status(401).json({ message: 'Error at config' });
 	// 	}
 	// };
-	
-
 }
 export default AdminController;

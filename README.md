@@ -1,4 +1,18 @@
+at production
+1.add file .env
+2.run server :pm2 start ./app/index.js --node-args="-r esm" --name server-prod
+
 https://www.youtube.com/watch?v=NjYsXuSBZ5U
+
+UFW
+
+SSL CERBOT:
+This certificate expires on 2024-02-09.
+These files will be updated when the certificate renews.
+Certbot has set up a scheduled task to automatically renew this certificate in the background.
+
+https://www.youtube.com/watch?v=NjYsXuSBZ5U
+
 # Deploying GenieBaddy stack on Ubuntu 20.04
 
 > Detailed step by step procedure to deploying PERN(mysql, Express, React, Node) stack on Ubuntu 20.04 with NGINX and SSL
@@ -42,13 +56,13 @@ run:
 npm i in the projects
 
 ## 5. Install and Configure PM2 RUN NODE
+
 npm install pm2@latest -g
 
 npm install esm
 npm cache clean --force
 rm -rf node_modules package-lock.json
 npm install
-
 
 ```
 
@@ -66,7 +80,9 @@ pm2 save
 Verify that the App is running
 
 ```
+
 pm2 status
+
 ```
 
 /////////////
@@ -78,12 +94,14 @@ Navigate to the client directory in our App code and run `npm run build`.
 This will create a finalized production ready version of our react frontent in directory called `build`. The build folder is what the NGINX server will be configured to serve.
 
 ```
+
 ubuntu@ip-172-31-20-1:~/apps/yelp-app/client$ ls
-README.md  build  node_modules  package-lock.json  package.json  public  src
+README.md build node_modules package-lock.json package.json public src
 ubuntu@ip-172-31-20-1:~/apps/yelp-app/client$ cd build/
 ubuntu@ip-172-31-20-1:~/apps/yelp-app/client/build$ ls
-asset-manifest.json  favicon.ico  index.html  logo192.png  logo512.png  manifest.json  precache-manifest.ee13f4c95d9882a5229da70669bb264c.js  robots.txt  service-worker.js  static
+asset-manifest.json favicon.ico index.html logo192.png logo512.png manifest.json precache-manifest.ee13f4c95d9882a5229da70669bb264c.js robots.txt service-worker.js static
 ubuntu@ip-172-31-20-1:~/apps/yelp-app/client/build$
+
 ```
 
 ## . Configure Environment Variables
@@ -98,41 +116,35 @@ export DOMAIN=www.commi..
 
 then run :source .env
 
-========================  
+========================
 at ~ create .env file with all env variable
 
 Create a file called `.env` in `/home/ubuntu/`. The file does not need to be named `.env` and it does not need to be stored in `/home/ubuntu`
 
 ```
-PORT=3001
-PGUSER=postgres
-PGHOST=localhost
-PGPASSWORD=password123
-PGDATABASE=yelp
-PGPORT=5432
-NODE_ENV=production
+
 ```
 
 set -o allexport; source /home/ubuntu/.env; set +o allexport
 
 ```
+
 printenv
-to use it after system upload  do:
+to use it after system upload do:
 open .profile
-add:  set -o allexport; source /home/ubuntu/.env; set +o allexport to end
+add: set -o allexport; source /home/ubuntu/.env; set +o allexport to end
 
+## 7. install front end code ,
 
-
-## 7. install front end code , 
-git pull npm  i
+git pull npm i
 npm run build
+
 ## 8.NGINX
-
-
 
 sudo apt install nginx -y
 sudo systemctl enable nginx
 systemctl status nginx
+
 ```
 Go AWS
 select instance
@@ -140,11 +152,11 @@ at browser run the instance  public ip -3.67.113.2
 
 go to security group and fix 80  and 443
 
-go to 
+go to
 cd /etc/nginx/sites-available
 
 
-There should be a server block called `default` 
+There should be a server block called `default`
 
 buy domain  for examplw namecheep
 copy default file to domain name :
@@ -157,19 +169,20 @@ at root  change to the client build path
 at server name add the domain name: with www  if no domain write the ip
         server_name commissaire.us www.commissaire.us 3.67.113.2;
 
-add link  
+add link
 sudo ln -s /etc/nginx/sites-available/commissaire.us /etc/nginx/sites-enabled/
 
-run 
+run
 sudo systemctl restart nginx
 
 check the ip on the browser      https://commissaire.us/loginuser
 ```
+
 update the file :
 server {
-        listen 80 ;
-        listen [::]:80;
-        root /home/ubuntu/apps/client/build;
+listen 80 ;
+listen [::]:80;
+root /home/ubuntu/apps/client/build;
 
         # Add index.php to the list if you are using PHP
         index index.html index.htm index.nginx-debian.html;
@@ -188,11 +201,9 @@ server {
 sudo systemctl restart nginx
 
 ad the file:(need for react apps)
-       location / {
-                try_files $uri /index.html;
-        }
-
-
+location / {
+try_files $uri /index.html;
+}
 
 ```
 The default server block is what will be responsible for handling requests that don't match any other server blocks. Right now if you navigate to your server ip, you will see a pretty bland html page that says NGINX is installed. That is the `default` server block in action.
