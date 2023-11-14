@@ -29,7 +29,7 @@ class GenieController extends BaseController {
 			return res.status(400).json({ error: 'No user id' });
 		}
 		try {
-			const SQL = `SELECT id, post_status, created_at, topic_id, user_header, user_1, user_3_date
+			const SQL = `SELECT id, post_status, created_at,last_writen_by, topic_id, user_header, user_1, user_3_date,
 				genie_1, user_2, genie_2, user_3, genie_3, user_1_date, user_2_date, 
 				user_3_date, genie_1_date, user_2_date, genie_2_date,rating,user_avatar,genie_avatar
 				FROM genie_posts WHERE genie_id = ${userId} and post_status!='${postStatus.NEW}'`;
@@ -38,7 +38,7 @@ class GenieController extends BaseController {
 				type: QueryTypes.SELECT,
 			});
 
-			const SQLUPDATE = `update genie_posts set genie_read=1 where genie_id=${userId} and genie_read=0 and post_status!='${postStatus.NEW}`;
+			const SQLUPDATE = `update genie_posts set genie_read=1 where genie_id=${userId} and genie_read=0 and post_status!='${postStatus.NEW}'`;
 			await this.sequelize.query(SQLUPDATE, {
 				type: QueryTypes.UPDATE,
 			});
@@ -62,16 +62,38 @@ class GenieController extends BaseController {
 			return res.status(400).json({ error: 'No user id' });
 		}
 		try {
-			const SQL = `SELECT id, post_status, created_at, topic_id, user_header, user_1, user_3_date
-				genie_1, user_2, genie_2, user_3, genie_3, user_1_date, user_2_date, 
-				user_3_date, genie_1_date, user_2_date, genie_2_date,rating,user_avatar,genie_avatar
-				FROM genie_posts WHERE genie_id = ${userId} and post_status!='${postStatus.NEW}'`;
+			const SQL = `SELECT id,
+			   post_status,
+			   created_at,
+			   topic_id,
+				user_header,
+				user_1,
+				user_3_date,
+				genie_1, 
+				user_2, 
+				genie_2, 
+				user_3, 
+				genie_3, 
+				user_1_date, 
+				user_2_date, 
+				user_3_date, 
+				genie_1_date, 
+				user_2_date, 
+				genie_2_date,
+				rating,
+				user_avatar,
+				genie_avatar,
+				last_writen_by
+				FROM genie_posts WHERE
+				 genie_id = ${userId} and 
+				 post_status='${postStatus.OPEN}' and 
+				 genie_read=0`;
 
 			const result = await this.sequelize.query(SQL, {
 				type: QueryTypes.SELECT,
 			});
 
-			const SQLUPDATE = `update genie_posts set genie_read=1 where genie_id=${userId} and genie_read=0 and post_status!='${postStatus.NEW}`;
+			const SQLUPDATE = `update genie_posts set genie_read=1 where genie_id=${userId} and genie_read=0 and post_status!='${postStatus.NEOPENW}'`;
 			await this.sequelize.query(SQLUPDATE, {
 				type: QueryTypes.UPDATE,
 			});
@@ -98,22 +120,20 @@ class GenieController extends BaseController {
 			return res.status(400).json({ error: 'No post  id' });
 		}
 
-		let resp = {};
 		try {
-			//to do
-			//check if this post allredy selected by some genie or its in status open or close the send  "ocupied and move to main"
-			const post = await PostModel.findOne({ where: { id: postId } });
-
-			// Check if post status is not NEW or genie_id is not null
-			if (post.status !== postStatus.NEW || post.genie_id !== null) {
-				// Post is already selected, so return an error response
+			let SQL = `SELECT * FROM genie_posts 
+           WHERE id = ${postId} and is_active=1 and is_block=0 and post_status='${postStatus.HOLD}'and genie_id=${userId}`;
+			const result = await this.sequelize.query(SQL, {
+				type: QueryTypes.SELECT,
+			});
+			if (!result || result.length === 0) {
 				return {
 					error: true,
 					message: 'Post already selected',
 				};
 			}
 			//update to open selected post
-			let SQL = `update genie_posts set post_status='${postStatus.OPEN}',genie_id=${userId},status_time=UTC_TIMESTAMP(),genie_avatar=:genie_avatar where id=:postId and post_status='${postStatus.HOLD}'`;
+			SQL = `update genie_posts set post_status='${postStatus.OPEN}',genie_id=${userId},status_time=UTC_TIMESTAMP(),genie_avatar=:genie_avatar where id=:postId and post_status='${postStatus.HOLD}'`;
 			console.log('SQL1	', SQL);
 			await this.sequelize.query(SQL, {
 				replacements: { postId: postId, genie_avatar: avatar ? avatar : 0 },
@@ -184,10 +204,20 @@ class GenieController extends BaseController {
 
 				//select chats the genie allredy watch tody and the or new or in hold
 				if (leftWatch < CON.MAX_GENIE_WATCH) {
-					let SQL = `SELECT id, post_status, created_at, topic_id, user_header, user_1, user_1_date, user_nickname
+					let SQL = `SELECT 
+					id, 
+					post_status, 
+					created_at, 
+					topic_id, 
+					user_header, 
+					user_1, 
+					user_1_date, 
+					user_nickname,
+					last_writen_by 
 				FROM genie_posts 
-				WHERE is_active=1 AND is_block=0 AND id IN (${watched})
-				AND (post_status='${postStatus.NEW}' OR (genie_id=${userId} AND post_status='${postStatus.HOLD}'))`;
+				WHERE is_active=1 AND 
+				is_block=0 AND id IN (${watched})AND 
+				(post_status='${postStatus.NEW}' OR (genie_id=${userId} AND post_status='${postStatus.HOLD}'))`;
 					const result1 = await this.sequelize.query(SQL, {
 						type: QueryTypes.SELECT,
 					});
@@ -197,8 +227,20 @@ class GenieController extends BaseController {
 				}
 				//select new chats to complite total up to 10 that are similar to genieTopics
 				if (leftWatch > 0) {
-					let SQL = `SELECT id, post_status, created_at, topic_id, user_header, user_1, user_1_date, user_nickname
-				FROM genie_posts WHERE is_active=1 AND is_block=0 AND post_status='${postStatus.NEW}'`;
+					let SQL = `SELECT 
+					id, 
+					post_status, 
+					created_at, 
+					topic_id, 
+					user_header, 
+					user_1, 
+					user_1_date, 
+					user_nickname,
+					last_writen_by 
+			   	FROM genie_posts WHERE
+					 is_active=1 AND
+					  is_block=0 AND
+					   post_status='${postStatus.NEW}'`;
 					if (genieTopics && genieTopics.length > 0) {
 						SQL += ` AND topic_id IN (${genieTopics})`;
 					}
@@ -282,10 +324,7 @@ class GenieController extends BaseController {
 		// const user = req.user;
 		// const today = moment.utc().format('YYYY-MM-DD');
 		try {
-			const SQL1 = `
-				select *
-				FROM genie_posts 
-				WHERE id = :post_id AND is_active = 1 and  post_status ="open" and is_block=0`;
+			const SQL1 = `select * FROM genie_posts WHERE id = :post_id AND is_active = 1 and  post_status ="open" and is_block=0`;
 			const currentPost = await this.sequelize.query(SQL1, {
 				replacements: { post_id: post_id },
 				type: QueryTypes.SELECT,

@@ -9,6 +9,11 @@ export default (router, app) => {
 		`/genieposts`,
 		genieController.genieGetPosts.bind(genieController),
 	);
+	// GET /gb/genienewchats
+	router.get(
+		`/genienewchats`,
+		genieController.genieGetNewChats.bind(genieController),
+	);
 	// GET /gb/genienewposts
 	router.get(
 		`/genienewposts`,
@@ -26,3 +31,5 @@ export default (router, app) => {
 	);
 
 	}
+
+

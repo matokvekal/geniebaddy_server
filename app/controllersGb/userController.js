@@ -1,7 +1,7 @@
 import BaseController from './baseController';
 const { QueryTypes } = require('sequelize');
 const { getFixedValue } = require('../utils/getFixedValues');
-
+import { postStatus } from '../constants/jenie';
 import config from '../config/config.json';
 import moment from 'moment';
 // import { post } from 'request';
@@ -15,9 +15,8 @@ class UserController extends BaseController {
 	userGetPosts = async (req, res) => {
 		const user = req.user;
 		console.log('at userGetPosts');
-		let resp = {};
 		try {
-			const SQL = `SELECT id, post_status, created_at, topic_id, user_header, user_1, user_3_date
+			const SQL = `SELECT id, post_status, created_at, topic_id, user_header, user_1, user_3_date,last_writen_by,
 			genie_1, user_2, genie_2, user_3, genie_3, user_1_date, user_2_date,user_avatar,genie_avatar, 
 			user_3_date, genie_1_date, user_2_date, genie_2_date,rating
 			FROM genie_posts WHERE user_id = :userId`;
@@ -27,7 +26,7 @@ class UserController extends BaseController {
 				type: QueryTypes.SELECT,
 			});
 
-			const SQLUPDATE = `update genie_posts set user_read=1 where genie_id=${user.id} and user_read=0 and post_status!='${postStatus.NEW}`;
+			const SQLUPDATE = `update genie_posts set user_read=1 where user_id=${user.id} and user_read=0 and post_status!='${postStatus.NEW}'`;
 			await this.sequelize.query(SQLUPDATE, {
 				type: QueryTypes.UPDATE,
 			});
@@ -39,6 +38,36 @@ class UserController extends BaseController {
 			return await res.createErrorLogAndSend({
 				err: e,
 				message: 'Some error occurred while userGetPosts',
+			});
+		}
+	};
+	// GET /gb/usernewchats
+	userGetNewChats = async (req, res) => {
+		const user = req.user;
+		console.log('at userGetNewChats');
+		try {
+			const SQL = `SELECT id, post_status, created_at, topic_id, user_header, user_1, user_3_date,last_writen_by,
+			genie_1, user_2, genie_2, user_3, genie_3, user_1_date, user_2_date,user_avatar,genie_avatar, 
+			user_3_date, genie_1_date, user_2_date, genie_2_date,rating
+			FROM genie_posts WHERE user_id = :userId and user_read=0 and (post_status='${postStatus.OPEN} or post_status='${postStatus.CLOSED}'`;
+
+			const result = await this.sequelize.query(SQL, {
+				replacements: { userId: user.id },
+				type: QueryTypes.SELECT,
+			});
+
+			const SQLUPDATE = `update genie_posts set user_read=1 where user_id=${user.id} and user_read=0 (post_status='${postStatus.OPEN} or post_status='${postStatus.CLOSED}'`;
+			await this.sequelize.query(SQLUPDATE, {
+				type: QueryTypes.UPDATE,
+			});
+
+			return res.send({
+				result,
+			});
+		} catch (e) {
+			return await res.createErrorLogAndSend({
+				err: e,
+				message: 'Some error occurred while userGetNewChats',
 			});
 		}
 	};
@@ -89,14 +118,12 @@ class UserController extends BaseController {
 		}
 	};
 
-	//	 POST api/gb/userpost
+	//	 POST api/gb/userposts
 	userSendPost = async (req, res) => {
 		console.log('get userSendPost');
 		// console.log('userpost', req.body);
-		const { topic_id, header, message, post_id, avatar } = req.body;
-		if (!topic_id) {
-			topic_id = config.DEFAULT_TOPIC_ID; // default topic
-		}
+		let { topic_id, header, message, post_id, avatar } = req.body;
+
 		if (!message || !post_id) {
 			return res.status(400).json({ error: 'Invalid request' });
 		}
@@ -104,6 +131,9 @@ class UserController extends BaseController {
 		const today = moment.utc().format('YYYY-MM-DD');
 		try {
 			if (post_id === 'new') {
+				if (!topic_id) {
+					topic_id = config.DEFAULT_TOPIC_ID; // default topic
+				}
 				const SQL1 = `SELECT user_posts_count_date, user_posts_count
 			   FROM genie_users WHERE id = :userId`;
 				const userPosts = await this.sequelize.query(SQL1, {
@@ -113,18 +143,24 @@ class UserController extends BaseController {
 
 				const userRecord = userPosts[0];
 				if (userRecord) {
-					const userRecordDate = moment(
-						userRecord.user_posts_count_date,
-					).format('YYYY-MM-DD');
-					const numOfPosts = parseInt(userRecord.user_posts_count, 10);
-
 					if (
-						userRecordDate === today &&
-						numOfPosts >= config.USER_POSTS_PER_DAY
+						userRecord.user_posts_count_date != null &&
+						userRecord.user_posts_count != null
 					) {
-						return res.status(400).json({ error: 'Daily post limit reached' });
-					}
+						const userRecordDate = moment(
+							userRecord.user_posts_count_date,
+						).format('YYYY-MM-DD');
+						const numOfPosts = parseInt(userRecord.user_posts_count, 10);
 
+						if (
+							userRecordDate === today &&
+							numOfPosts >= config.USER_POSTS_PER_DAY
+						) {
+							return res
+								.status(400)
+								.json({ error: 'Daily post limit reached' });
+						}
+					}
 					const transaction = await this.sequelize.transaction();
 					try {
 						const SQL2 = `
@@ -146,9 +182,23 @@ class UserController extends BaseController {
 							type: QueryTypes.UPDATE,
 							transaction: transaction,
 						});
+						const SQLTOPIC = `select topic_name from genie_topics where id=:topic_id`;
+						const user_header = await this.sequelize.query(SQLTOPIC, {
+							replacements: {
+								topic_id: topic_id,
+							},
+							type: QueryTypes.SELECT,
+							transaction: transaction,
+						});
+						let headerData = '';
+						if (user_header && user_header[0]) {
+							headerData = user_header[0].topic_name;
+						} else {
+							headerData = topic_id;
+						}
 
 						const SQL3 = `INSERT INTO genie_posts (is_active, post_status, topic_id, user_header, user_1, created_at, user_id,user_1_date,last_writen_by,is_block,user_avatar,user_read) 
-					   VALUES (1, "new", :topic_id, :header, :user_1, UTC_TIMESTAMP(), :user_id,UTC_TIMESTAMP(),"user_1",0,:avatar,1)`;
+					   VALUES (1, "new", :topic_id, '${headerData}', :user_1, UTC_TIMESTAMP(), :user_id,UTC_TIMESTAMP(),"user_1",0,:avatar,1)`;
 						const newPost = await this.sequelize.query(SQL3, {
 							replacements: {
 								topic_id,

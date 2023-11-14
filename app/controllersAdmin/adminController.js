@@ -63,7 +63,7 @@ class AdminController extends BaseController {
 			let filter = req.filter || null;
 
 			let SQL = `select id,branch,name,place,expected_start_date,expected_start_time,location,main_competition_name,
-								Terms,main_competition_name,country,year,race_manager,manager_phone,main_commissaire,race_term_link
+								Terms,main_competition_name,country,year,race_manager,manager_phone,main_commissaire,race_term_link 
 								from races
 								where is_active=1 
 								and is_public=1
@@ -467,7 +467,6 @@ class AdminController extends BaseController {
 
 	// GET /menu
 	menu = async (req, res) => {
-		let resp = {};
 		try {
 			const SQL = `SELECT menu_name,menu_index,text,parent_id,link_to FROM menu WHERE menu_name = 'main' and role='free' and is_active=1`;
 			const result = await this.sequelize.query(SQL, {

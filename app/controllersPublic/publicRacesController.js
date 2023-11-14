@@ -133,7 +133,7 @@ class PublicRacesController extends BaseController {
 		 FROM race_categories c
 		 WHERE c.race_id = ${race_id} AND c.is_active = 1 AND c.is_public = 1
 		 ORDER BY c.id`;
-					// 	const SQL = `SELECT c.id,c.race_name,c.category_name,c.laps,c.date,
+			// 	const SQL = `SELECT c.id,c.race_name,c.category_name,c.laps,c.date,
 			// c.lap_distance,c.total_distance,c.participants,c.current_lap,c.start_time
 			// ,c.finishers,c.need_bike_check,c.need_gear_check,c.color,c.status,
 			// c.commissaire_name,c.commissaire_role,c.need_bike_check,c.need_gear_check
@@ -273,7 +273,6 @@ class PublicRacesController extends BaseController {
 	};
 	// GET /api/Free/menu
 	getFreeRaceMenu = async (req, res) => {
-		let resp = {};
 		try {
 			const SQL = `SELECT menu_name,menu_index,text,parent_id,link_to FROM menu WHERE menu_name = 'main' and role='free' and is_active=1`;
 			const result = await this.sequelize.query(SQL, {

@@ -18,8 +18,8 @@ const baseConfig = {
 		DB_NAME: 'commissaire',
 		dialect: 'mysql',
 		pool: {
-			max: 5,
-			min: 0,
+			max: 10,
+			min: 3,
 			acquire: 30000,
 			idle: 10000,
 		},

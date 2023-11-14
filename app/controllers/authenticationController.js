@@ -164,7 +164,6 @@ class AuthenticationController extends BaseController {
 					status: 401,
 				});
 			}
-			// let SQL = `SELECT * FROM users  WHERE user_name like  '${fixed_email}' and is_register=0 and otp='${confirmationCode}' and otp_trys<10 `;
 			let SQL = `SELECT * FROM users WHERE user_name LIKE :fixedEmail AND is_register=0 AND otp=:confirmationCode AND otp_trys<10`;
 			userResult = await this.sequelize.query(SQL, {
 				replacements: {

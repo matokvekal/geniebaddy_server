@@ -6,9 +6,12 @@ export default (router, app) => {
 
 	// GET api/gb/userposts
 	router.get(`/userposts`, userController.userGetPosts.bind(userController));
+	// GET api/gb/usernewchats
+	router.get(`/usernewchats`, userController.userGetNewChats.bind(userController));
 	// POST api/gb/userpost
 	router.post(`/userpost`, userController.userSendPost.bind(userController));
 
 	// GET api/gb/getuserlimits
 	router.get(`/getuserlimits`, userController.userLimits.bind(userController));
 };
+

@@ -85,7 +85,6 @@ class GenieController extends BaseController {
 	//POST /gb/newCpost
 	newPost = async (req, res) => {
 		console.log('newPost', req.body);
-		// let resp = {};
 		try {
 			let { userId, userTopic, chat } = req.body;
 			userId = 1;
@@ -151,7 +150,6 @@ class GenieController extends BaseController {
 	//Get /gb/post
 	getPost = async (req, res) => {
 		console.log('getPost', req.query);
-		let resp = {};
 		try {
 			let postId = req.query.id;
 			let userId = 1;
@@ -318,7 +316,6 @@ class GenieController extends BaseController {
 	// GET /gb/topics
 	topics = async (req, res) => {
 		console.log('topics', req.query);
-		let resp = {};
 		try {
 			const SQL = `select id,topic_name,active_genies from genie_topics`;
 			const result = await this.sequelize.query(SQL, {
@@ -382,7 +379,6 @@ class GenieController extends BaseController {
 		const topic_exists = req.body.topic_exists;
 		const topic_id = req.body.topic_id;
 
-		let resp = {};
 		try {
 			let SQL = '';
 			// switch (topic_exists) {
@@ -450,7 +446,6 @@ class GenieController extends BaseController {
 
 		let genieId = req.query.genieId; // from aUTH MIDDLEWARE
 
-		let resp = {};
 		try {
 			let replacements = {
 				genieFieldText: text,
