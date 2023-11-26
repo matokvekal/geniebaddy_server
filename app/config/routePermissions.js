@@ -1,6 +1,7 @@
 export default {
 	'/userposts': ['user'],
 	'/userpost': ['user'],
+	'/usernewchats': ['user'],
 	'/getuserlimits': ['user'],
 	'/topics': ['user', 'genie'],
 	'/genieposts': ['genie'],

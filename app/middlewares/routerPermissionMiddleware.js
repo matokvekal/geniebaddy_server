@@ -9,7 +9,10 @@ const checkRoutePermission = (req, res, next) => {
 	if (rolesAllowed.includes('all')) {
 		return next();
 	}
-	if (rolesAllowed.includes(req.user.user_role) || rolesAllowed.includes('all')) {
+	if (
+		rolesAllowed.includes(req.user.user_role) ||
+		rolesAllowed.includes('all')
+	) {
 		return next();
 	} else {
 		return res.status(403).send('Access denied');

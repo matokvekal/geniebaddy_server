@@ -16,21 +16,22 @@ class UserController extends BaseController {
 		const user = req.user;
 		console.log('at userGetPosts');
 		try {
-			const SQL = `SELECT id, post_status, created_at, topic_id, user_header, user_1, user_3_date,last_writen_by,
-			genie_1, user_2, genie_2, user_3, genie_3, user_1_date, user_2_date,user_avatar,genie_avatar, 
-			user_3_date, genie_1_date, user_2_date, genie_2_date,rating
-			FROM genie_posts WHERE user_id = :userId`;
-
+			const SQL = `SELECT id, post_status, created_at, topic_id, user_header, user_1,last_writen_by,
+			genie_1, user_2, genie_2, user_3, genie_3, user_1_date,user_avatar,genie_avatar,user_nickname,genie_nickname,
+			user_3_date, genie_1_date, user_2_date, genie_2_date,genie_3_date,rating,user_save
+			FROM genie_posts WHERE user_id = :userId and is_active=1 and( post_status= '${postStatus.OPEN}' or post_status='${postStatus.CLOSED}'
+			or post_status='${postStatus.NEW}' or post_status='${postStatus.USER_CHECK}' or post_status='${postStatus.GENIE_CHECK}')`;
+			console.log('userGetPosts', SQL);
 			const result = await this.sequelize.query(SQL, {
 				replacements: { userId: user.id },
 				type: QueryTypes.SELECT,
 			});
 
-			const SQLUPDATE = `update genie_posts set user_read=1 where user_id=${user.id} and user_read=0 and post_status!='${postStatus.NEW}'`;
+			const SQLUPDATE = `update genie_posts set user_read=1 where user_id=${user.id} and user_read=0 and is_active=1`;
 			await this.sequelize.query(SQLUPDATE, {
 				type: QueryTypes.UPDATE,
 			});
-
+			console.log('userGetPosts result', result);
 			return res.send({
 				result,
 			});
@@ -49,14 +50,16 @@ class UserController extends BaseController {
 			const SQL = `SELECT id, post_status, created_at, topic_id, user_header, user_1, user_3_date,last_writen_by,
 			genie_1, user_2, genie_2, user_3, genie_3, user_1_date, user_2_date,user_avatar,genie_avatar, 
 			user_3_date, genie_1_date, user_2_date, genie_2_date,rating
-			FROM genie_posts WHERE user_id = :userId and user_read=0 and (post_status='${postStatus.OPEN} or post_status='${postStatus.CLOSED}'`;
+			FROM genie_posts WHERE user_id = :userId and user_read=0  and is_active=1 
+			and (post_status='${postStatus.OPEN}' or post_status='${postStatus.NEW}' or post_status='${postStatus.CLOSED}')`;
 
+			console.log('userGetNewChats', SQL);
 			const result = await this.sequelize.query(SQL, {
 				replacements: { userId: user.id },
 				type: QueryTypes.SELECT,
 			});
 
-			const SQLUPDATE = `update genie_posts set user_read=1 where user_id=${user.id} and user_read=0 (post_status='${postStatus.OPEN} or post_status='${postStatus.CLOSED}'`;
+			const SQLUPDATE = `update genie_posts set user_read=1 where user_id=${user.id} and user_read=0 and (post_status='${postStatus.OPEN}' or post_status='${postStatus.CLOSED}')`;
 			await this.sequelize.query(SQLUPDATE, {
 				type: QueryTypes.UPDATE,
 			});
@@ -118,7 +121,7 @@ class UserController extends BaseController {
 		}
 	};
 
-	//	 POST api/gb/userposts
+	//	 POST api/gb/userpost
 	userSendPost = async (req, res) => {
 		console.log('get userSendPost');
 		// console.log('userpost', req.body);
@@ -170,9 +173,10 @@ class UserController extends BaseController {
 							 user_posts_count = 
 							 CASE
 								  WHEN user_posts_count_date != :today THEN 1
-								  ELSE user_posts_count + 1
+								  ELSE COALESCE(user_posts_count, 0) + 1
 							 END
-						WHERE id = :userId
+						WHERE id = :userId;
+						
 							`;
 						await this.sequelize.query(SQL2, {
 							replacements: {
@@ -196,9 +200,18 @@ class UserController extends BaseController {
 						} else {
 							headerData = topic_id;
 						}
+						//update table topisc set used=used+1 where id=topic_id
+						const SQLTOPICUPDATE = `update genie_topics set used=used+1 where id=:topic_id`;
+						await this.sequelize.query(SQLTOPICUPDATE, {
+							replacements: {
+								topic_id: topic_id,
+							},
+							type: QueryTypes.UPDATE,
+							transaction: transaction,
+						});
 
-						const SQL3 = `INSERT INTO genie_posts (is_active, post_status, topic_id, user_header, user_1, created_at, user_id,user_1_date,last_writen_by,is_block,user_avatar,user_read) 
-					   VALUES (1, "new", :topic_id, '${headerData}', :user_1, UTC_TIMESTAMP(), :user_id,UTC_TIMESTAMP(),"user_1",0,:avatar,1)`;
+						const SQL3 = `INSERT INTO genie_posts (is_active, post_status,status_time, topic_id, user_header, user_1, created_at, user_id,user_1_date,last_writen_by,user_avatar,user_read) 
+					   VALUES (1, '${postStatus.NEW}', UTC_TIMESTAMP(), :topic_id, '${headerData}', :user_1, UTC_TIMESTAMP(), :user_id,UTC_TIMESTAMP(),"user_1",:avatar,1)`;
 						const newPost = await this.sequelize.query(SQL3, {
 							replacements: {
 								topic_id,
@@ -233,7 +246,7 @@ class UserController extends BaseController {
 					const SQL1 = `
 					select *
 					FROM genie_posts 
-					WHERE id = :post_id AND is_active = 1 and  post_status ="open" and is_block=0`;
+					WHERE id = :post_id AND is_active = 1 and  post_status ='${postStatus.OPEN}'`;
 					const currentPost = await this.sequelize.query(SQL1, {
 						replacements: { post_id: post_id },
 						type: QueryTypes.SELECT,
@@ -265,7 +278,7 @@ class UserController extends BaseController {
 						const SQL3 = `
 						UPDATE genie_posts
 						SET ${nextUserField} = :message, ${nextUserDateField} = UTC_TIMESTAMP(),last_writen_by = :last_writen_by, user_read=1,genie_read=0 
-						WHERE id = :post_id`;
+						WHERE id = :post_id and post_status='${postStatus.OPEN}' and is_active=1`;
 						console.log('SQL3', SQL3);
 						await this.sequelize.query(SQL3, {
 							replacements: {

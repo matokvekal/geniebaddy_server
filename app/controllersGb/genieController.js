@@ -38,10 +38,10 @@ class GenieController extends BaseController {
 				type: QueryTypes.SELECT,
 			});
 
-			const SQLUPDATE = `update genie_posts set genie_read=1 where genie_id=${userId} and genie_read=0 and post_status!='${postStatus.NEW}'`;
-			await this.sequelize.query(SQLUPDATE, {
-				type: QueryTypes.UPDATE,
-			});
+			// const SQLUPDATE = `update genie_posts set genie_read=1 where genie_id=${userId} and genie_read=0 and post_status!='${postStatus.NEW}'`;
+			// await this.sequelize.query(SQLUPDATE, {
+			// 	type: QueryTypes.UPDATE,
+			// });
 
 			return res.send({
 				result,
@@ -86,17 +86,16 @@ class GenieController extends BaseController {
 				last_writen_by
 				FROM genie_posts WHERE
 				 genie_id = ${userId} and 
-				 post_status='${postStatus.OPEN}' and 
-				 genie_read=0`;
+				 post_status='${postStatus.OPEN}'`;
 
 			const result = await this.sequelize.query(SQL, {
 				type: QueryTypes.SELECT,
 			});
 
-			const SQLUPDATE = `update genie_posts set genie_read=1 where genie_id=${userId} and genie_read=0 and post_status!='${postStatus.NEOPENW}'`;
-			await this.sequelize.query(SQLUPDATE, {
-				type: QueryTypes.UPDATE,
-			});
+			// const SQLUPDATE = `update genie_posts set genie_read=1 where genie_id=${userId} and genie_read=0 and post_status!='${postStatus.NEOPENW}'`;
+			// await this.sequelize.query(SQLUPDATE, {
+			// 	type: QueryTypes.UPDATE,
+			// });
 
 			return res.send({
 				result,
@@ -122,7 +121,7 @@ class GenieController extends BaseController {
 
 		try {
 			let SQL = `SELECT * FROM genie_posts 
-           WHERE id = ${postId} and is_active=1 and is_block=0 and post_status='${postStatus.HOLD}'and genie_id=${userId}`;
+           WHERE id = ${postId} and is_active=1  and post_status='${postStatus.HOLD}'and genie_id=${userId}`;
 			const result = await this.sequelize.query(SQL, {
 				type: QueryTypes.SELECT,
 			});
@@ -216,7 +215,7 @@ class GenieController extends BaseController {
 					last_writen_by 
 				FROM genie_posts 
 				WHERE is_active=1 AND 
-				is_block=0 AND id IN (${watched})AND 
+				 id IN (${watched})AND 
 				(post_status='${postStatus.NEW}' OR (genie_id=${userId} AND post_status='${postStatus.HOLD}'))`;
 					const result1 = await this.sequelize.query(SQL, {
 						type: QueryTypes.SELECT,
@@ -239,7 +238,6 @@ class GenieController extends BaseController {
 					last_writen_by 
 			   	FROM genie_posts WHERE
 					 is_active=1 AND
-					  is_block=0 AND
 					   post_status='${postStatus.NEW}'`;
 					if (genieTopics && genieTopics.length > 0) {
 						SQL += ` AND topic_id IN (${genieTopics})`;
@@ -324,7 +322,7 @@ class GenieController extends BaseController {
 		// const user = req.user;
 		// const today = moment.utc().format('YYYY-MM-DD');
 		try {
-			const SQL1 = `select * FROM genie_posts WHERE id = :post_id AND is_active = 1 and  post_status ="open" and is_block=0`;
+			const SQL1 = `select * FROM genie_posts WHERE id = :post_id AND is_active = 1 and  post_status ="open"`;
 			const currentPost = await this.sequelize.query(SQL1, {
 				replacements: { post_id: post_id },
 				type: QueryTypes.SELECT,
@@ -356,8 +354,7 @@ class GenieController extends BaseController {
 						nextUserTurn === config.USER_CHATS_PER_POST
 							? `,post_status='closed',status_time=UTC_TIMESTAMP()`
 							: ''
-					},
-					user_read=0,genie_read=1 
+					}
 					WHERE id = :post_id`;
 				console.log('SQL3', SQL3);
 				await this.sequelize.query(SQL3, {

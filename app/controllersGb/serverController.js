@@ -14,7 +14,7 @@ class ServerController extends BaseController {
 
 		try {
 			const SQL = `
-			SELECT id, topic_name, active_genies ,color
+			SELECT id, topic_name, active_genies ,color,used
 			FROM genie_topics 
 			WHERE is_active = 1 
 			ORDER BY used DESC

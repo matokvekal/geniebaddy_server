@@ -1,5 +1,6 @@
 at production
-1.add file .env
+1.add file .env  at /app/serve   ls-la (hidden file)
+pm2 delete 0
 2.run server :pm2 start ./app/index.js --node-args="-r esm" --name server-prod
 
 https://www.youtube.com/watch?v=NjYsXuSBZ5U
@@ -94,13 +95,6 @@ Navigate to the client directory in our App code and run `npm run build`.
 This will create a finalized production ready version of our react frontent in directory called `build`. The build folder is what the NGINX server will be configured to serve.
 
 ```
-
-ubuntu@ip-172-31-20-1:~/apps/yelp-app/client$ ls
-README.md build node_modules package-lock.json package.json public src
-ubuntu@ip-172-31-20-1:~/apps/yelp-app/client$ cd build/
-ubuntu@ip-172-31-20-1:~/apps/yelp-app/client/build$ ls
-asset-manifest.json favicon.ico index.html logo192.png logo512.png manifest.json precache-manifest.ee13f4c95d9882a5229da70669bb264c.js robots.txt service-worker.js static
-ubuntu@ip-172-31-20-1:~/apps/yelp-app/client/build$
 
 ```
 
