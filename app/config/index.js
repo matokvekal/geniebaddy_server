@@ -2,7 +2,7 @@
 // require('dotenv').config();
 
 import Logger from '../utils/Logger';
-console.log('at index.js process.env.NODE_ENV', process.env.NODE_ENV);
+// console.log('at index.js process.env.NODE_ENV', process.env.NODE_ENV);
 const mode = process.env.NODE_ENV || 'development';
 Logger.debug(`Server is running in  ${mode} mode`);
 

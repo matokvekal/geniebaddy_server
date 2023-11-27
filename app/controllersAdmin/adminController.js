@@ -72,7 +72,7 @@ class AdminController extends BaseController {
 								limit ${limit}
 								offset ${offset}
 								`;
-			//console.log(SQL);
+			////console.log(SQL);
 			const result = await this.sequelize.query(SQL, {
 				type: QueryTypes.SELECT,
 			});
@@ -216,7 +216,7 @@ class AdminController extends BaseController {
 						SQL = ` ${SQL} ${header.trim()} VARCHAR(120) NULL,`;
 					});
 					SQL = ` ${SQL} PRIMARY KEY (id))`;
-					// console.log(SQL)
+					// //console.log(SQL)
 					query(
 						SQL,
 						function (result, fields) {
@@ -257,14 +257,14 @@ class AdminController extends BaseController {
 										SQL = `${sqlStart} ${sqlEnd.slice(0, -2)}`;
 										sqlEnd = '(';
 										console.log('start 4 insert sql index:', index);
-										// console.log(SQL);
+										// //console.log(SQL);
 										query(
 											SQL,
 											function (result, fields) {
 												//5)insert the data from tem table to race_riders table
 												console.log('finish 4 insert sql index:', index);
 												SQL = `CALL insert_race_data("${meta.fileName}","${meta.country}",${meta.ownerId});`;
-												// console.log(SQL);
+												// //console.log(SQL);
 												query(
 													SQL,
 													function (appsresult, fields) {
@@ -346,7 +346,7 @@ class AdminController extends BaseController {
 		 and c.is_active=1 
 		 and  c.is_public=1 
 		 and owner_id=${owner_id}`;
-			//console.log(SQL);
+			////console.log(SQL);
 			const result = await this.sequelize.query(SQL, {
 				type: QueryTypes.SELECT,
 			});
@@ -386,7 +386,7 @@ class AdminController extends BaseController {
 		${race_rider_id ? `and race_rider_id=${race_rider_id}` : ''}
 		order by race_category_id,race_rider_id,_rank`;
 
-			//console.log(SQL);
+			////console.log(SQL);
 			const result = await this.sequelize.query(SQL, {
 				type: QueryTypes.SELECT,
 			});
@@ -424,7 +424,7 @@ class AdminController extends BaseController {
 	// 	and is_public=1
 	// 	order by id`;
 	// 		//TODO if race not start then sort by rider bib number
-	// 		//console.log(SQL);
+	// 		////console.log(SQL);
 	// 		const result = await this.sequelize.query(SQL, {
 	// 			type: QueryTypes.SELECT,
 	// 		});
@@ -449,7 +449,7 @@ class AdminController extends BaseController {
 			const SQL = `CALL getFiltersFreeRaces(${
 				country ? `"${country}"` : null
 			},${year})`;
-			//console.log(SQL);
+			////console.log(SQL);
 			const result = await this.sequelize.query(SQL);
 			const freeToken = req.freeToken;
 

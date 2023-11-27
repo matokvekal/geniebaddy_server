@@ -16,24 +16,56 @@ class UserController extends BaseController {
 		const user = req.user;
 		console.log('at userGetPosts');
 		try {
-			const SQL = `SELECT id, post_status, created_at, topic_id, user_header, user_1,last_writen_by,
+			const SQL = `SELECT id, post_status, created_at, topic_id, user_header, user_1,last_writen_by,user_read,
 			genie_1, user_2, genie_2, user_3, genie_3, user_1_date,user_avatar,genie_avatar,user_nickname,genie_nickname,
 			user_3_date, genie_1_date, user_2_date, genie_2_date,genie_3_date,rating,user_save
 			FROM genie_posts WHERE user_id = :userId and is_active=1 and user_delete !=1 and( post_status= '${postStatus.OPEN}' or post_status='${postStatus.CLOSED}'
 			or post_status='${postStatus.NEW}' or post_status='${postStatus.USER_CHECK}' or post_status='${postStatus.GENIE_CHECK}')`;
-			console.log('userGetPosts', SQL);
+			// console.log('userGetPosts', SQL);
 			const result = await this.sequelize.query(SQL, {
 				replacements: { userId: user.id },
 				type: QueryTypes.SELECT,
 			});
 
-			const SQLUPDATE = `update genie_posts set user_read=1 where user_id=${user.id} and user_read=0 and is_active=1`;
-			await this.sequelize.query(SQLUPDATE, {
-				type: QueryTypes.UPDATE,
-			});
-			console.log('userGetPosts result', result);
+			// const SQLUPDATE = `update genie_posts set user_read=1 where user_id=${user.id} and user_read=0 and is_active=1`;
+			// await this.sequelize.query(SQLUPDATE, {
+			// 	type: QueryTypes.UPDATE,
+			// });
+			// console.log('userGetPosts result', result);
 			return res.send({
 				result,
+			});
+		} catch (e) {
+			return await res.createErrorLogAndSend({
+				err: e,
+				message: 'Some error occurred while userGetPosts',
+			});
+		}
+	};
+	// PUT /gb/userreadposts
+	userReadPosts = async (req, res) => {
+		const user = req.user;
+		const post_id = req.query.postid;
+		console.log('at userReadPosts');
+		try {
+			// const SQL = `SELECT *
+			// FROM genie_posts WHERE user_id = :userId and is_active=1 and user_delete !=1 and( post_status= '${postStatus.OPEN}')`;
+			// // console.log('userGetPosts', SQL);
+			// const result = await this.sequelize.query(SQL, {
+			// 	replacements: { userId: user.id },
+			// 	type: QueryTypes.SELECT,
+			// });
+			// if(result && result[0].user_read===0){
+			const SQL = `update genie_posts set user_read=1 where id = :post_id and user_id=${user.id} and user_read=0 and is_active=1`;
+			console.log('r ', SQL);
+			const result = await this.sequelize.query(SQL, {
+				replacements: { post_id: post_id },
+				type: QueryTypes.UPDATE,
+			});
+
+			// }
+			return res.send({
+				'user_read': post_id,
 			});
 		} catch (e) {
 			return await res.createErrorLogAndSend({
@@ -49,21 +81,21 @@ class UserController extends BaseController {
 		const post_id = req.query.postId;
 		console.log('at userGetPosts');
 		try {
-			const SQL = `SELECT id, post_status, created_at, topic_id, user_header, user_1,last_writen_by,
+			const SQL = `SELECT id, post_status, created_at, topic_id, user_header, user_1,last_writen_by,user_read,
 			genie_1, user_2, genie_2, user_3, genie_3, user_1_date,user_avatar,genie_avatar,user_nickname,genie_nickname,
 			user_3_date, genie_1_date, user_2_date, genie_2_date,genie_3_date,rating,user_save
 			FROM genie_posts WHERE id = :post_id and user_id = :userId and is_active=1 and user_delete !=1 and( post_status= '${postStatus.OPEN}' or post_status='${postStatus.CLOSED}'
 			or post_status='${postStatus.NEW}' or post_status='${postStatus.USER_CHECK}' or post_status='${postStatus.GENIE_CHECK}')`;
-			console.log('userGetPosts', SQL);
+			// console.log('userGetPosts', SQL);
 			const result = await this.sequelize.query(SQL, {
 				replacements: { userId: user.id, post_id: post_id },
 				type: QueryTypes.SELECT,
 			});
 
-			const SQLUPDATE = `update genie_posts set user_read=1 where user_id=${user.id} and user_read=0 and is_active=1 and user_id = ${user.id}`;
-			await this.sequelize.query(SQLUPDATE, {
-				type: QueryTypes.UPDATE,
-			});
+			// const SQLUPDATE = `update genie_posts set user_read=1 where user_id=${user.id} and user_read=0 and is_active=1 and user_id = ${user.id}`;
+			// await this.sequelize.query(SQLUPDATE, {
+			// 	type: QueryTypes.UPDATE,
+			// });
 			console.log('userGetPostById result');
 			return res.send({
 				result,
@@ -81,22 +113,22 @@ class UserController extends BaseController {
 		const user = req.user;
 		console.log('at userGetNewChats');
 		try {
-			const SQL = `SELECT id, post_status, created_at, topic_id, user_header, user_1, user_3_date,last_writen_by,
+			const SQL = `SELECT id, post_status, created_at, topic_id, user_header, user_1, user_3_date,last_writen_by,user_read,
 			genie_1, user_2, genie_2, user_3, genie_3, user_1_date, user_2_date,user_avatar,genie_avatar, 
-			user_3_date, genie_1_date, user_2_date, genie_2_date,rating
+			user_3_date, genie_1_date, user_2_date, genie_2_date,rating 
 			FROM genie_posts WHERE user_id = :userId and user_read=0  and is_active=1 and user_delete !=1 
 			and (post_status='${postStatus.OPEN}' or post_status='${postStatus.NEW}' or post_status='${postStatus.CLOSED}')`;
 
-			console.log('userGetNewChats', SQL);
+			// console.log('userGetNewChats', SQL);
 			const result = await this.sequelize.query(SQL, {
 				replacements: { userId: user.id },
 				type: QueryTypes.SELECT,
 			});
 
-			const SQLUPDATE = `update genie_posts set user_read=1 where user_id=${user.id}  and is_active=1 and user_read=0 and (post_status='${postStatus.OPEN}' or post_status='${postStatus.CLOSED}')`;
-			await this.sequelize.query(SQLUPDATE, {
-				type: QueryTypes.UPDATE,
-			});
+			// const SQLUPDATE = `update genie_posts set user_read=1 where user_id=${user.id}  and is_active=1 and user_read=0 and (post_status='${postStatus.OPEN}' or post_status='${postStatus.CLOSED}')`;
+			// await this.sequelize.query(SQLUPDATE, {
+			// 	type: QueryTypes.UPDATE,
+			// });
 
 			return res.send({
 				result,
@@ -313,7 +345,7 @@ class UserController extends BaseController {
 						UPDATE genie_posts
 						SET ${nextUserField} = :message, ${nextUserDateField} = UTC_TIMESTAMP(),last_writen_by = :last_writen_by, user_read=1,genie_read=0 
 						WHERE id = :post_id and post_status='${postStatus.OPEN}' and is_active=1 and user_delete !=1`;
-						console.log('SQL3', SQL3);
+						// console.log('SQL3', SQL3);
 						await this.sequelize.query(SQL3, {
 							replacements: {
 								last_writen_by: nextUserField,
@@ -397,7 +429,7 @@ class UserController extends BaseController {
 				default:
 					return res.status(400).json({ error: 'Invalid action' });
 			}
-			console.log('SQL updateUserAction', SQL);
+			// console.log('SQL updateUserAction', SQL);
 			await this.sequelize.query(SQL, {
 				replacements: { post_id: post_id, comment: comment },
 				type: QueryTypes.UPDATE,

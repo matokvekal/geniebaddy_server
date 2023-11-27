@@ -63,7 +63,7 @@ class PublicRacesController extends BaseController {
 								limit ${limit}
 								offset ${offset}
 								`;
-			//   console.log(SQL);
+			//   //console.log(SQL);
 			const result = await this.sequelize.query(SQL, {
 				type: QueryTypes.SELECT,
 			});
@@ -97,7 +97,7 @@ class PublicRacesController extends BaseController {
 			let SQL = `SELECT  id,branch,name,place,year FROM commissaire.races 
 			where year !="0000-00-00"
 			order by year desc,expected_start_date  desc limit 5`;
-			//  console.log(SQL);
+			//  //console.log(SQL);
 			const result = await this.sequelize.query(SQL, {
 				type: QueryTypes.SELECT,
 			});
@@ -142,7 +142,7 @@ class PublicRacesController extends BaseController {
 			//  c.race_id=${race_id}
 			//  and c.is_active=1
 			//  and  c.is_public=1`;
-			// console.log(SQL);
+			// //console.log(SQL);
 			const result = await this.sequelize.query(SQL, {
 				type: QueryTypes.SELECT,
 			});
@@ -181,7 +181,7 @@ class PublicRacesController extends BaseController {
 		${race_rider_id ? `and race_rider_id=${race_rider_id}` : ''}
 		order by race_category_id,race_rider_id,id`;
 
-			// console.log(SQL);
+			// //console.log(SQL);
 			const result = await this.sequelize.query(SQL, {
 				type: QueryTypes.SELECT,
 			});
@@ -231,12 +231,12 @@ class PublicRacesController extends BaseController {
 			// and is_public=1
 			// order by id`;
 			//TODO if race not start then sort by rider bib number
-			//console.log(SQL,1);
+			////console.log(SQL,1);
 			const result = await this.sequelize.query(SQL, {
 				type: QueryTypes.SELECT,
 			});
 			const token = req.token;
-			//console.log(SQL,1);
+			////console.log(SQL,1);
 			return res.send({
 				token,
 				result,
@@ -256,7 +256,7 @@ class PublicRacesController extends BaseController {
 			const SQL = `CALL getFiltersFreeRaces(${
 				country ? `'${country}'` : null
 			},${year})`;
-			//console.log(SQL);
+			////console.log(SQL);
 			const result = await this.sequelize.query(SQL);
 			const token = req.token;
 
@@ -297,7 +297,7 @@ class PublicRacesController extends BaseController {
 			const SQL = `select f.field_name,f.label,f._type as type,f.type_data,f._order as 'order',f.can_search,f.user_hide,f.user_select,f.can_edit,f.can_add,f.column_width,
 		 f.add_place_holder,f.drop_list_values,f.drop_list_Header,f.max_length,f.hide_in_client from  commissaire.fields_admin f  where
 		 f.app_name = 'race_riders' and f.app_id=8888888 and f.is_active=1 and (f.hide_in_client =0  or hide_in_client is null) order by _order;`;
-			//console.log(SQL);
+			////console.log(SQL);
 			let result = await this.sequelize.query(SQL, { type: QueryTypes.SELECT });
 			return res.status(200).send(result);
 		} catch (e) {
@@ -377,7 +377,7 @@ class PublicRacesController extends BaseController {
 		limit ${return_limit}
 		offset ${return_offset}
 		`;
-			//console.log(SQL);
+			////console.log(SQL);
 
 			const rows = await this.sequelize.query(SQL, {
 				type: QueryTypes.SELECT,
@@ -390,7 +390,7 @@ class PublicRacesController extends BaseController {
 		${search ? search : ''}
 		order by rr.id desc`;
 
-			//console.log(SQL);
+			////console.log(SQL);
 
 			const totalRows = await this.sequelize.query(SQL, {
 				type: QueryTypes.SELECT,

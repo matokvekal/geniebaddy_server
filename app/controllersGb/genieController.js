@@ -133,7 +133,7 @@ class GenieController extends BaseController {
 			}
 			//update to open selected post
 			SQL = `update genie_posts set post_status='${postStatus.OPEN}',genie_id=${userId},status_time=UTC_TIMESTAMP(),genie_avatar=:genie_avatar where id=:postId and post_status='${postStatus.HOLD}'`;
-			console.log('SQL1	', SQL);
+			// console.log('SQL1	', SQL);
 			await this.sequelize.query(SQL, {
 				replacements: { postId: postId, genie_avatar: avatar ? avatar : 0 },
 				type: QueryTypes.UPDATE,
@@ -287,7 +287,7 @@ class GenieController extends BaseController {
 							user_1_date: row.user_1_date,
 						};
 					});
-					console.log('result', result.length);
+					// console.log('result', result.length);
 					return res.send({ result });
 				} else {
 					return res.send({
@@ -356,7 +356,7 @@ class GenieController extends BaseController {
 							: ''
 					}
 					WHERE id = :post_id`;
-				console.log('SQL3', SQL3);
+				// console.log('SQL3', SQL3);
 				await this.sequelize.query(SQL3, {
 					replacements: {
 						last_writen_by: nextUserField,

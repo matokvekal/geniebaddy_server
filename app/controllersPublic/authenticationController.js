@@ -73,7 +73,7 @@ class AuthenticationController extends BaseController {
 					// const oid = user.owner_id;
 					const email = user.email;
 					SQL = `UPDATE users set last_login="${moment().format('YYYY-MM-DD HH:mm:ss')}",token="${token}"  WHERE user_name like  '${fixed_email}' `;
-					console.log('SQL', SQL);
+					// console.log('SQL', SQL);
 					userResult = await this.sequelize.query(SQL, {
 						type: QueryTypes.UPDATE,
 					});

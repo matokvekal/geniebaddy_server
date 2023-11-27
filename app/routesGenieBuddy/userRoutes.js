@@ -15,10 +15,10 @@ export default (router, app) => {
 	router.get(`/getuserlimits`, userController.userLimits.bind(userController));
 	// GET api/gb/getpostbyid
 	router.get(`/getpostbyid`, userController.userGetPostById.bind(userController));	
-	
-
 
 		// POST /gb/useraction
-
 	router.post(`/useraction`, userController.updateUserAction.bind(userController));
+		// PUT /gb/userreadposts
+	router.get(`/userreadposts`, userController.userReadPosts.bind(userController));
 };
+

@@ -10,7 +10,7 @@ momentTimeZone.tz.setDefault('Etc/UTC');
 // const cors = require('cors');
 export default async (config) => {
 	console.log('init server');
-	console.log('at init server process.env', process.env.NODE_ENV);
+	// console.log('at init server process.env', process.env.NODE_ENV);
 	const app = express();
 	const GbRouter = express.Router();
 	const db = await initDatabase(config);

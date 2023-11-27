@@ -73,7 +73,7 @@ class AuthController extends BaseController {
 					const token = createToken(user_name, user_role);
 
 					SQL = `
-							UPDATE users 
+							UPDATE genie_users 
 							SET last_login="${moment().format('YYYY-MM-DD HH:mm:ss')}", token=:token
 							WHERE user_name LIKE :user_name
 							`;

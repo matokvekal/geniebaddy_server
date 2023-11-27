@@ -232,7 +232,7 @@ class AuthenticationController extends BaseController {
 	'0' ,
 	'${moment().format('YYYY-MM-DD HH:mm:ss')}')`;
 
-					// console.log(SQL);
+					// //console.log(SQL);
 					const response = await this.sequelize.query(SQL, {
 						type: QueryTypes.SELECT,
 					});

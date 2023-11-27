@@ -24,7 +24,7 @@ class ServerController extends BaseController {
 				type: QueryTypes.SELECT,
 			});
 
-			console.log('topics result', result);
+			// console.log('topics result', result);
 			return res.send({
 				result,
 			});

@@ -33,7 +33,7 @@ class CyclingController extends BaseController {
 			${getFixedValue(req.user.user_name)},
 			${getFixedValue(defaultRadius)},
 			'${time}')`;
-			console.log(SQL);
+			// //console.log(SQL);
 			const response = await this.sequelize.query(SQL, {
 				type: QueryTypes.SELECT,
 			});
@@ -92,7 +92,7 @@ class CyclingController extends BaseController {
 			${getFixedValue(action)},
 			${getFixedValue(rider2)},
 			'${time}')`;
-			console.log(SQL);
+			//console.log(SQL);
 			const response = await this.sequelize.query(SQL, {
 				type: QueryTypes.SELECT,
 			});
@@ -170,7 +170,7 @@ class CyclingController extends BaseController {
 				${getFixedValue(need_help)},
 				'${time}')`;
 
-			console.log(SQL);
+			//console.log(SQL);
 			const response = await this.sequelize.query(SQL, {
 				type: QueryTypes.SELECT,
 			});
@@ -196,7 +196,6 @@ class CyclingController extends BaseController {
 		}
 	};
 
-
 	// POST/api/cycling/transmit
 	callRidingStatus = async (req, res) => {
 		try {
@@ -219,17 +218,19 @@ class CyclingController extends BaseController {
 			const { mode } = req.body;
 			console.log('mode', mode);
 			const userName = req.user.user_name;
-			const isRiding=mode==='1'?1:0;
+			const isRiding = mode === '1' ? 1 : 0;
 			const SQL = `UPDATE commissaire.cycling_active
 			SET is_riding = ${isRiding},
 			server_time = NOW(),
 			start_ride = CASE WHEN ${isRiding} = 1 THEN NOW() ELSE start_ride END
-			WHERE rider_id = (SELECT id FROM users WHERE user_name = ${getFixedValue(userName)});
+			WHERE rider_id = (SELECT id FROM users WHERE user_name = ${getFixedValue(
+				userName,
+			)});
 			`;
 			// const SQL = `UPDATE commissaire.cycling_active
-			// 		set is_riding=${isRiding},server_time=now(),start_ride=now() 
+			// 		set is_riding=${isRiding},server_time=now(),start_ride=now()
 			// 		WHERE rider_id = (SELECT id FROM users WHERE user_name = ${getFixedValue(userName)});`;
-					console.log(SQL);
+			//console.log(SQL);
 			let result = await this.sequelize.query(SQL, { type: QueryTypes.SELECT });
 			return res.status(200).send(result);
 		} catch (e) {
@@ -259,13 +260,32 @@ class CyclingController extends BaseController {
 					message: 'Error: user is not activated',
 				});
 			}
-			console.log(req.body);
-			let { long, lat, time, heading, speed, timestamp, sender,inTransmitMode } = req.body;
+			// console.log(req.body);
+			let {
+				long,
+				lat,
+				time,
+				heading,
+				speed,
+				timestamp,
+				sender,
+				inTransmitMode,
+			} = req.body;
 
-			timestamp = timestamp &&timestamp!='0'
-				? moment.unix(timestamp).format('YYYY-MM-DD HH:mm:ss')
-				: '0';
-				console.log(long, lat, time, heading, speed, timestamp, sender,inTransmitMode );
+			timestamp =
+				timestamp && timestamp != '0'
+					? moment.unix(timestamp).format('YYYY-MM-DD HH:mm:ss')
+					: '0';
+			console.log(
+				long,
+				lat,
+				time,
+				heading,
+				speed,
+				timestamp,
+				sender,
+				inTransmitMode,
+			);
 			if (!long || !lat) {
 				return res.send({
 					success: false,
@@ -283,7 +303,7 @@ class CyclingController extends BaseController {
 				${getFixedValue(timestamp)},
 				${getFixedValue(sender)})`;
 
-			console.log(SQL);
+			//console.log(SQL);
 			await this.sequelize.query(SQL, { type: QueryTypes.SELECT });
 			return res.send({ success: true, message: 'ok' });
 		} catch (err) {

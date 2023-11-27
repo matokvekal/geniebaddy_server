@@ -15,4 +15,5 @@ export default {
 	'/confirmCodeEmail': ['all'],
 	'/useraction': ['user'],
 	'/getpostbyid': ['user'],
+	'/userreadposts': ['user'],
 };
