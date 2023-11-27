@@ -13,4 +13,6 @@ export default {
 	'/forgot_password': ['all'],
 	'/reset_password': ['all'],
 	'/confirmCodeEmail': ['all'],
+	'/useraction': ['user'],
+	'/getpostbyid': ['user'],
 };

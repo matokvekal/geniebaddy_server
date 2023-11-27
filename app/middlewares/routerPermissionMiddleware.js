@@ -4,7 +4,7 @@ const checkRoutePermission = (req, res, next) => {
 	const rolesAllowed = routePermissions[req.path];
 
 	if (!rolesAllowed) {
-		return res.status(404).send('Route not found');
+		return res.status(404).send('Route not found / not allowed');
 	}
 	if (rolesAllowed.includes('all')) {
 		return next();
