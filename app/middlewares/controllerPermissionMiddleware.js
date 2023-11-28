@@ -21,7 +21,7 @@ const getIsAllowedWithoutUser = (allowedConfigObject, controller) => {
 
 const controllerPermissionMiddleware =
 	(db, allowedConfigObject) => async (req, res, next) => {
-		console.log('at getIsAllowedWithUser');
+		console.log('at permition middlware');
 		const [_space, controller, action] = req.path.split('/'); // if needed we can also use the specific api ('action') instead of the all controller
 		const isAllowedWithoutUser = getIsAllowedWithoutUser(
 			allowedConfigObject,

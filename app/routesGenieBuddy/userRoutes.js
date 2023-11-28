@@ -16,8 +16,8 @@ export default (router, app) => {
 	// GET api/gb/getpostbyid
 	router.get(`/getpostbyid`, userController.userGetPostById.bind(userController));	
 
-		// POST /gb/useraction
-	router.post(`/useraction`, userController.updateUserAction.bind(userController));
+		// POST /gb/action
+	router.post(`/action`, userController.updateAction.bind(userController));
 		// PUT /gb/userreadposts
 	router.get(`/userreadposts`, userController.userReadPosts.bind(userController));
 };

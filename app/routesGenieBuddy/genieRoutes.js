@@ -19,16 +19,26 @@ export default (router, app) => {
 		`/genienewposts`,
 		genieController.genieGetNewPosts.bind(genieController),
 	);
+	// GET /gb/geniegetpostbyid
+	router.get(
+		`/geniegetpostbyid`,
+		genieController.genieGetPostBiid.bind(genieController),
+	);
 	// POST /gb/geniepost
 	router.post(
 		`/geniepost`,
 		genieController.genieSendPost.bind(genieController),
 	);
+	
 	// POST /gb/geniechoosepost
 	router.post(
 		`/geniechoosepost`,
 		genieController.genieChoosePost.bind(genieController),
 	);
+
+		// GET /gb/geniereadposts
+	router.get(`/geniereadposts`,
+	genieController.genieReadPosts.bind(genieController));
 
 	}
 

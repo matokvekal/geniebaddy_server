@@ -29,10 +29,13 @@ class GenieController extends BaseController {
 			return res.status(400).json({ error: 'No user id' });
 		}
 		try {
-			const SQL = `SELECT id, post_status, created_at,last_writen_by, topic_id, user_header, user_1, user_3_date,
-				genie_1, user_2, genie_2, user_3, genie_3, user_1_date, user_2_date, 
-				user_3_date, genie_1_date, user_2_date, genie_2_date,rating,user_avatar,genie_avatar
-				FROM genie_posts WHERE genie_id = ${userId} and post_status!='${postStatus.NEW}'`;
+			const SQL = `SELECT p.id, post_status, created_at,last_writen_by, topic_id,topic_name, user_header, user_1, user_3_date,
+			genie_1, user_2, genie_2, user_3, genie_3, user_1_date, user_2_date, 
+			user_3_date, genie_1_date, user_2_date, genie_2_date,rating,user_avatar,genie_avatar
+			FROM genie_posts as p
+				 join genie_topics as t
+				 on t.id=p.topic_id
+				WHERE genie_id = ${userId} and post_status!='${postStatus.NEW}'`;
 
 			const result = await this.sequelize.query(SQL, {
 				type: QueryTypes.SELECT,
@@ -62,10 +65,11 @@ class GenieController extends BaseController {
 			return res.status(400).json({ error: 'No user id' });
 		}
 		try {
-			const SQL = `SELECT id,
+			const SQL = `SELECT p.id,
 			   post_status,
 			   created_at,
 			   topic_id,
+				topic_name,
 				user_header,
 				user_1,
 				user_3_date,
@@ -84,9 +88,12 @@ class GenieController extends BaseController {
 				user_avatar,
 				genie_avatar,
 				last_writen_by
-				FROM genie_posts WHERE
-				 genie_id = ${userId} and 
-				 post_status='${postStatus.OPEN}'`;
+				FROM genie_posts as p
+				join genie_topics as t
+            on t.id=p.topic_id
+				WHERE
+				genie_id = ${userId} and 
+				post_status='${postStatus.OPEN}'`;
 
 			const result = await this.sequelize.query(SQL, {
 				type: QueryTypes.SELECT,
@@ -204,17 +211,20 @@ class GenieController extends BaseController {
 				//select chats the genie allredy watch tody and the or new or in hold
 				if (leftWatch < CON.MAX_GENIE_WATCH) {
 					let SQL = `SELECT 
-					id, 
+					p.id, 
 					post_status, 
 					created_at, 
-					topic_id, 
+					topic_id,
+					topic_name, 
 					user_header, 
 					user_1, 
 					user_1_date, 
 					user_nickname,
 					last_writen_by 
-				FROM genie_posts 
-				WHERE is_active=1 AND 
+				FROM genie_posts as p
+				join genie_topics as t
+            on t.id=p.topic_id
+				WHERE p.is_active=1 AND t.is_active = 1 AND 
 				 id IN (${watched})AND 
 				(post_status='${postStatus.NEW}' OR (genie_id=${userId} AND post_status='${postStatus.HOLD}'))`;
 					const result1 = await this.sequelize.query(SQL, {
@@ -227,17 +237,20 @@ class GenieController extends BaseController {
 				//select new chats to complite total up to 10 that are similar to genieTopics
 				if (leftWatch > 0) {
 					let SQL = `SELECT 
-					id, 
+					p.id, 
 					post_status, 
 					created_at, 
-					topic_id, 
+					topic_id,
+					topic_name, 
 					user_header, 
 					user_1, 
 					user_1_date, 
 					user_nickname,
 					last_writen_by 
-			   	FROM genie_posts WHERE
-					 is_active=1 AND
+			   	FROM genie_posts as p
+				   join genie_topics as t
+               on t.id=p.topic_id
+					WHERE	 is_active=1 AND
 					   post_status='${postStatus.NEW}'`;
 					if (genieTopics && genieTopics.length > 0) {
 						SQL += ` AND topic_id IN (${genieTopics})`;
@@ -376,6 +389,62 @@ class GenieController extends BaseController {
 		} catch (error) {
 			console.error(error);
 			return res.status(500).json({ error: 'Internal Server Error' });
+		}
+	};
+
+	// GET /gb/geniegetpostbyid
+	genieGetPostBiid = async (req, res) => {
+		const user = req.user;
+		const post_id = req.query.postId;
+		console.log('at genieGetPostBiid');
+		try {
+			const SQL = `SELECT p.id, post_status, created_at, topic_id, user_header, user_1,last_writen_by,user_read,
+			genie_1, user_2, genie_2, user_3, genie_3, user_1_date,user_avatar,genie_avatar,user_nickname,genie_nickname,
+			user_3_date, genie_1_date, user_2_date, genie_2_date,genie_3_date,rating,user_save
+			FROM genie_posts as p
+                join genie_topics as t
+                on t.id=p.topic_id
+			WHERE id = :post_id and user_id = :userId and p.is_active=1 AND t.is_active = 1 AND user_delete !=1 and( post_status= '${postStatus.OPEN}' or post_status='${postStatus.CLOSED}'
+			or post_status='${postStatus.NEW}' or post_status='${postStatus.USER_CHECK}' or post_status='${postStatus.GENIE_CHECK}')`;
+			// console.log('userGetPosts', SQL);
+			const result = await this.sequelize.query(SQL, {
+				replacements: { userId: user.id, post_id: post_id },
+				type: QueryTypes.SELECT,
+			});
+
+			console.log('genieGetPostBiid result');
+			return res.send({
+				result,
+			});
+		} catch (e) {
+			return await res.createErrorLogAndSend({
+				err: e,
+				message: 'Some error occurred while genieGetPostBiid',
+			});
+		}
+	};
+	// GET /gb/geniereadposts
+	genieReadPosts = async (req, res) => {
+		const user = req.user;
+		const post_id = req.query.postid;
+		console.log('at geniereadposts');
+		try {
+			const SQL = `update genie_posts set genie_read=1 where id = :post_id and user_id=${user.id} and genie_read=0 and is_active=1`;
+			console.log('r ', SQL);
+			const result = await this.sequelize.query(SQL, {
+				replacements: { post_id: post_id },
+				type: QueryTypes.UPDATE,
+			});
+
+			// }
+			return res.send({
+				user_read: post_id,
+			});
+		} catch (e) {
+			return await res.createErrorLogAndSend({
+				err: e,
+				message: 'Some error occurred while geniereadposts',
+			});
 		}
 	};
 }
