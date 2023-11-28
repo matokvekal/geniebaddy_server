@@ -82,7 +82,7 @@ class UserController extends BaseController {
 			FROM genie_posts as p
                 join genie_topics as t
                 on t.id=p.topic_id 
-			WHERE id = :post_id and user_id = :userId and p.is_active=1 AND t.is_active = 1 AND user_delete !=1 and( post_status= '${postStatus.OPEN}' or post_status='${postStatus.CLOSED}'
+			WHERE p.id = :post_id and user_id = :userId and p.is_active=1 AND t.is_active = 1 AND user_delete !=1 and( post_status= '${postStatus.OPEN}' or post_status='${postStatus.CLOSED}'
 			or post_status='${postStatus.NEW}' or post_status='${postStatus.USER_CHECK}' or post_status='${postStatus.GENIE_CHECK}')`;
 			// console.log('userGetPosts', SQL);
 			const result = await this.sequelize.query(SQL, {

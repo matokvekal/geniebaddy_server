@@ -4,7 +4,7 @@ export default {
 	'/forgot_password': ['all'],
 	'/reset_password': ['all'],
 	'/confirmCodeEmail': ['all'],
-	'/useraction': ['user'],
+	'/action': ['user'],
 	'/getpostbyid': ['user'],
 	'/userreadposts': ['user'],
 	'/userposts': ['user'],
