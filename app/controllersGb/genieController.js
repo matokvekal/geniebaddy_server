@@ -329,14 +329,16 @@ class GenieController extends BaseController {
 				}
 			} catch (e) {
 				// Rollback the transaction in case of an error
-				await transaction.rollback();
+				if (transaction) await transaction.rollback();
+				// await transaction.rollback();
 				return res.createErrorLogAndSend({
 					err: e,
 					message: 'Some error occurred genieGetNewPosts',
 				});
 			}
 		} catch (e) {
-			await transaction.rollback();
+			if (transaction) await transaction.rollback();
+			// await transaction.rollback();
 			return await res.createErrorLogAndSend({
 				err: e,
 				message: 'Some error occurred genieGetNewPosts',
