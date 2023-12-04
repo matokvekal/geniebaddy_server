@@ -4,12 +4,11 @@ export const postStatus = {
 	DELETED: `deleted`,
 	NEW: `new`,
 	HOLD: `hold`,
-	USER_CHECK: `user_check`,
-	GENIE_CHECK: `genie_check`,
+	USER_AI: `user_ai`,
+	GENIE_AI: `genie_ai`,
 };
 
 export const CON = {
 	MAX_GENIE_WATCH: 10,
 	MAX_GENIE_ANSWER: 10,
 };
-

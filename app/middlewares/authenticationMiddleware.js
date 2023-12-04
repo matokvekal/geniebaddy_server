@@ -61,6 +61,8 @@ const bypass = async (req, db) => {
 };
 
 async function logUsers(userName, token, req, db) {
+	//ERRORTEST this is temporary return to test the erros at db 04-12-2023
+	return;
 	await db.log_users.create({
 		user_name: userName,
 		ip: JSON.stringify(req.client._peername),

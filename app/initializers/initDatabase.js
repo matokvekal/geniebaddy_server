@@ -22,8 +22,20 @@ export default async (config) => {
 				min: config.database.pool.min,
 				acquire: config.database.pool.acquire,
 				idle: config.database.pool.idle,
-			},
-		}
+			}, retry: {//this is new code try to avoid the error of connection lost in develop
+				max: 5, // Maximum number of tries
+				match: [
+				  Sequelize.ConnectionError,
+				  Sequelize.ConnectionRefusedError,
+				  Sequelize.HostNotFoundError,
+				  Sequelize.HostNotReachableError,
+				  Sequelize.InvalidConnectionError
+				],
+				backoffBase: 300, // Initial delay in ms
+				backoffExponent: 1.1, // Exponential backoff factor
+			 }
+		},
+		
 	);
 
 	const db = { sequelize };

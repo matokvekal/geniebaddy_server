@@ -28,14 +28,27 @@ class GenieController extends BaseController {
 		if (!userId) {
 			return res.status(400).json({ error: 'No user id' });
 		}
-		try {
-			const SQL = `SELECT p.id, post_status, created_at,last_writen_by, topic_id,topic_name, user_header, user_1, user_3_date,
-			genie_1, user_2, genie_2, user_3, genie_3, user_1_date, user_2_date, 
-			user_3_date, genie_1_date, user_2_date, genie_2_date,rating,user_avatar,genie_avatar
-			FROM genie_posts as p
+
+		//
+		const SQL = `SELECT p.id, post_status, created_at, topic_id,topic_name, user_header, user_1,last_writen_by,user_read,
+		genie_1, user_2, genie_2, user_3, genie_3, user_1_date,user_avatar,genie_avatar,user_nickname,genie_nickname,
+		user_3_date, genie_1_date, user_2_date, genie_2_date,genie_3_date,rating,user_save
+		FROM genie_posts as p
 				 join genie_topics as t
-				 on t.id=p.topic_id
-				WHERE genie_id = ${userId} and post_status!='${postStatus.NEW}'`;
+				 on t.id=p.topic_id 
+		WHERE user_id = :userId and p.is_active=1 AND t.is_active = 1 AND user_delete !=1 and( post_status= '${postStatus.OPEN}' or post_status='${postStatus.CLOSED}'
+		or post_status='${postStatus.NEW}' or post_status='${postStatus.USER_AI}' or post_status='${postStatus.GENIE_AI}')`;
+
+		//
+		try {
+			const SQL = `SELECT p.id, post_status, created_at, topic_id,topic_name, user_header, user_1,last_writen_by,user_read,
+			genie_1, user_2, genie_2, user_3, genie_3, user_1_date,user_avatar,genie_avatar,user_nickname,genie_nickname,
+			user_3_date, genie_1_date, user_2_date, genie_2_date,genie_3_date,rating,user_save
+			FROM genie_posts as p
+					 join genie_topics as t
+					 on t.id=p.topic_id 
+				WHERE genie_id = ${userId} and p.is_active=1 AND t.is_active = 1 AND user_delete !=1 and( post_status= '${postStatus.OPEN}' or post_status='${postStatus.CLOSED}'
+				 or post_status='${postStatus.USER_AI}' or post_status='${postStatus.GENIE_AI}')`;
 
 			const result = await this.sequelize.query(SQL, {
 				type: QueryTypes.SELECT,
@@ -56,7 +69,9 @@ class GenieController extends BaseController {
 			});
 		}
 	};
+
 	// GET /gb/genienewchats
+
 	genieGetNewChats = async (req, res) => {
 		console.log('at genieGetNewChats');
 		const user = req.user;
@@ -114,9 +129,9 @@ class GenieController extends BaseController {
 			});
 		}
 	};
-	// POST /gb/genieChoosePost
-	genieChoosePost = async (req, res) => {
-		console.log('at genieChoosePost');
+	// POST /gb/genieclamePost
+	genieClamePost = async (req, res) => {
+		console.log('at genieClamePost');
 		const user = req.user;
 		const userId = user.id;
 
@@ -133,10 +148,9 @@ class GenieController extends BaseController {
 				type: QueryTypes.SELECT,
 			});
 			if (!result || result.length === 0) {
-				return {
-					error: true,
-					message: 'Post already selected',
-				};
+				{
+					return res.status(400).json({ error: 'Post already selected' });
+				}
 			}
 			//update to open selected post
 			SQL = `update genie_posts set post_status='${postStatus.OPEN}',genie_id=${userId},status_time=UTC_TIMESTAMP(),genie_avatar=:genie_avatar where id=:postId and post_status='${postStatus.HOLD}'`;
@@ -166,7 +180,7 @@ class GenieController extends BaseController {
 			console.log(e);
 			return await res.createErrorLogAndSend({
 				err: e,
-				message: 'Some error occurred while genieChoosePost',
+				message: 'Some error occurred while genieClamePost',
 			});
 		}
 	};
@@ -174,6 +188,7 @@ class GenieController extends BaseController {
 	// GET /gb/genienewposts
 	genieGetNewPosts = async (req, res) => {
 		console.log('at genieGetNewPosts');
+		let transaction;
 		try {
 			const userId = req.user.id;
 			const info = await this.genieInfo(userId);
@@ -202,7 +217,7 @@ class GenieController extends BaseController {
 					error: 'You have answered 10 times today, please wait for tomorrow',
 				});
 			}
-			const transaction = await this.sequelize.transaction();
+			transaction = await this.sequelize.transaction();
 			try {
 				//if genie watch today>0 select (if its new ) to res 1
 				//if watch today<10 so select  new with same topit limit   10-watch today they new and  ginie=0but the id not in watch1
@@ -211,7 +226,8 @@ class GenieController extends BaseController {
 				//select chats the genie allredy watch tody and the or new or in hold
 				if (leftWatch < CON.MAX_GENIE_WATCH) {
 					let SQL = `SELECT 
-					p.id, 
+					p.id,
+					p.user_avatar, 
 					post_status, 
 					created_at, 
 					topic_id,
@@ -225,7 +241,7 @@ class GenieController extends BaseController {
 				join genie_topics as t
             on t.id=p.topic_id
 				WHERE p.is_active=1 AND t.is_active = 1 AND 
-				 id IN (${watched})AND 
+				 p.id IN (${watched})AND 
 				(post_status='${postStatus.NEW}' OR (genie_id=${userId} AND post_status='${postStatus.HOLD}'))`;
 					const result1 = await this.sequelize.query(SQL, {
 						type: QueryTypes.SELECT,
@@ -238,6 +254,7 @@ class GenieController extends BaseController {
 				if (leftWatch > 0) {
 					let SQL = `SELECT 
 					p.id, 
+					p.user_avatar,
 					post_status, 
 					created_at, 
 					topic_id,
@@ -250,14 +267,14 @@ class GenieController extends BaseController {
 			   	FROM genie_posts as p
 				   join genie_topics as t
                on t.id=p.topic_id
-					WHERE	 is_active=1 AND
+					WHERE	 p.is_active=1 AND
 					   post_status='${postStatus.NEW}'`;
 					if (genieTopics && genieTopics.length > 0) {
 						SQL += ` AND topic_id IN (${genieTopics})`;
 					}
 					if (resultTotal && resultTotal.length > 0) {
 						const allredyWatch = resultTotal.map((row) => row.id).join(',');
-						SQL += ` AND id NOT IN (${allredyWatch})`;
+						SQL += ` AND p.id NOT IN (${allredyWatch})`;
 					}
 					SQL += ` LIMIT ${leftWatch}`;
 
@@ -292,12 +309,15 @@ class GenieController extends BaseController {
 					const result = resultTotal.map((row) => {
 						return {
 							id: row.id,
+							user_avatar: row.user_avatar,
 							post_status: row.post_status,
 							created_at: row.created_at,
 							topic_id: row.topic_id,
 							user_header: row.user_header,
 							user_1: row.user_1,
-							user_1_date: row.user_1_date,
+							topic_name: row.topic_name,
+							user_nickname: row.user_nickname,
+							topic_name: row.topic_name,
 						};
 					});
 					// console.log('result', result.length);
@@ -405,7 +425,7 @@ class GenieController extends BaseController {
                 join genie_topics as t
                 on t.id=p.topic_id
 			WHERE id = :post_id and user_id = :userId and p.is_active=1 AND t.is_active = 1 AND user_delete !=1 and( post_status= '${postStatus.OPEN}' or post_status='${postStatus.CLOSED}'
-			or post_status='${postStatus.NEW}' or post_status='${postStatus.USER_CHECK}' or post_status='${postStatus.GENIE_CHECK}')`;
+			or post_status='${postStatus.NEW}' or post_status='${postStatus.USER_AI}' or post_status='${postStatus.GENIE_AI}')`;
 			// console.log('userGetPosts', SQL);
 			const result = await this.sequelize.query(SQL, {
 				replacements: { userId: user.id, post_id: post_id },

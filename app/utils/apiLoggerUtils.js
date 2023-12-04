@@ -7,6 +7,9 @@ let creationArr = [];
 let timer;
 
 export const getLogRecordData = (req) => {
+	//ERRORTEST this is temporary return to test the erros at db 04-12-2023
+	return;
+	console.log("at getLogRecordData");
 	const userName = req && req.user ? req.user.user_name : 'NO USER';
 	let cpu = osu.cpu;
 	var current = cpu.average();
@@ -22,6 +25,9 @@ export const getLogRecordData = (req) => {
 };
 
 export const getErrorLogRecordData = (req, error) => {
+	//ERRORTEST this is temporary return to test the erros at db 04-12-2023
+	return;
+	console.log("at getErrorLogRecordData");
 	return {
 		...getLogRecordData(req),
 		err: error,
@@ -29,11 +35,17 @@ export const getErrorLogRecordData = (req, error) => {
 };
 
 export const createErrorLog = async (db, req, error) => {
+	//ERRORTEST this is temporary return to test the erros at db 04-12-2023
+	return;
+	console.log("at createErrorLog");
 	const errorLogData = getErrorLogRecordData(req, error);
 	return await db.logs.create({ ...getLogRecordData(req),  ...errorLogData });
 };
 
 export const loggerDebounce = (func, timeout = 300) => {
+	//ERRORTEST this is temporary return to test the erros at db 04-12-2023
+	return;
+	console.log("at loggerDebounce");
 	return (...args) => {
 		clearTimeout(timer);
 		const req = args[0];
@@ -47,16 +59,20 @@ export const loggerDebounce = (func, timeout = 300) => {
 };
 
 export const createLogs = async (db) => {
+	//ERRORTEST this is temporary return to test the erros at db 04-12-2023
+	return;
+	console.log("at createLogs");
 	if (creationArr && creationArr.length) {
 		await db.logs.bulkCreate(creationArr);
 	}
 };
 
 export const debouncedCreateLogs =
-
-
 		(action = createLogs) =>
 		(req, db) => {
+			console.log("at debouncedCreateLogs");
+				//ERRORTEST this is temporary return to test the erros at db 04-12-2023
+	return;
 			loggerDebounce(
 				async () => await action(db),
 				config.loggerDebounceAmountInMS

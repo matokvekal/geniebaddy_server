@@ -14,7 +14,7 @@ export default {
 	'/geniegetpostbyid': ['genie'],
 	'/topics': ['user', 'genie'],
 	'/genieposts': ['genie'],
-	'/geniechoosepost': ['genie'],
+	'/genieclamepost': ['genie'],
 	'/genienewposts': ['genie'],
 	'/geniepost': ['genie'],
 	'/geniereadposts': ['genie'],

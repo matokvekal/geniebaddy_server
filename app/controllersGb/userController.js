@@ -23,7 +23,7 @@ class UserController extends BaseController {
                 join genie_topics as t
                 on t.id=p.topic_id 
 			WHERE user_id = :userId and p.is_active=1 AND t.is_active = 1 AND user_delete !=1 and( post_status= '${postStatus.OPEN}' or post_status='${postStatus.CLOSED}'
-			or post_status='${postStatus.NEW}' or post_status='${postStatus.USER_CHECK}' or post_status='${postStatus.GENIE_CHECK}')`;
+			or post_status='${postStatus.NEW}' or post_status='${postStatus.USER_AI}' or post_status='${postStatus.GENIE_AI}')`;
 			// console.log('userGetPosts', SQL);
 			const result = await this.sequelize.query(SQL, {
 				replacements: { userId: user.id },
@@ -83,7 +83,7 @@ class UserController extends BaseController {
                 join genie_topics as t
                 on t.id=p.topic_id 
 			WHERE p.id = :post_id and user_id = :userId and p.is_active=1 AND t.is_active = 1 AND user_delete !=1 and( post_status= '${postStatus.OPEN}' or post_status='${postStatus.CLOSED}'
-			or post_status='${postStatus.NEW}' or post_status='${postStatus.USER_CHECK}' or post_status='${postStatus.GENIE_CHECK}')`;
+			or post_status='${postStatus.NEW}' or post_status='${postStatus.USER_AI}' or post_status='${postStatus.GENIE_AI}')`;
 			// console.log('userGetPosts', SQL);
 			const result = await this.sequelize.query(SQL, {
 				replacements: { userId: user.id, post_id: post_id },
