@@ -74,7 +74,7 @@ class AuthController extends BaseController {
 
 					SQL = `
 							UPDATE genie_users 
-							SET last_login="${moment().format('YYYY-MM-DD HH:mm:ss')}", token=:token
+							SET last_login="${moment().format('YYYY-MM-DD HH:mm:ss')}", token=:token,,last_active=UTC_TIMESTAMP() 
 							WHERE user_name LIKE :user_name
 							`;
 					// console.log('SQL', SQL);

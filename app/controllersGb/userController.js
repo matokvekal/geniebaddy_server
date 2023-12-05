@@ -30,11 +30,6 @@ class UserController extends BaseController {
 				type: QueryTypes.SELECT,
 			});
 
-			// const SQLUPDATE = `update genie_posts set user_read=1 where user_id=${user.id} and user_read=0 and is_active=1`;
-			// await this.sequelize.query(SQLUPDATE, {
-			// 	type: QueryTypes.UPDATE,
-			// });
-			// console.log('userGetPosts result', result);
 			return res.send({
 				result,
 			});
@@ -125,11 +120,6 @@ class UserController extends BaseController {
 				replacements: { userId: user.id },
 				type: QueryTypes.SELECT,
 			});
-
-			// const SQLUPDATE = `update genie_posts set user_read=1 where user_id=${user.id}  and is_active=1 and user_read=0 and (post_status='${postStatus.OPEN}' or post_status='${postStatus.CLOSED}')`;
-			// await this.sequelize.query(SQLUPDATE, {
-			// 	type: QueryTypes.UPDATE,
-			// });
 
 			return res.send({
 				result,
@@ -237,6 +227,7 @@ class UserController extends BaseController {
 						UPDATE genie_users
 						SET 
 							 user_posts_count_date = :today,
+							 last_active=UTC_TIMESTAMP(),
 							 user_posts_count = 
 							 CASE
 								  WHEN user_posts_count_date != :today THEN 1

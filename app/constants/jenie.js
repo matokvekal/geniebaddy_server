@@ -11,4 +11,6 @@ export const postStatus = {
 export const CON = {
 	MAX_GENIE_WATCH: 10,
 	MAX_GENIE_ANSWER: 10,
+	MIN_TOPICS_FOR_USE: 10,
 };
+

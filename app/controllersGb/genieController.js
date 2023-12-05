@@ -167,7 +167,7 @@ class GenieController extends BaseController {
 				type: QueryTypes.UPDATE,
 			});
 
-			SQL = `UPDATE genie_users SET genie_answer_count=genie_answer_count+1, genie_answer_count_date=UTC_TIMESTAMP() WHERE id=?`;
+			SQL = `UPDATE genie_users SET genie_answer_count=genie_answer_count+1,last_active=UTC_TIMESTAMP(), genie_answer_count_date=UTC_TIMESTAMP() WHERE id=?`;
 			// console.log('SQL3	', SQL);
 			await this.sequelize.query(SQL, {
 				replacements: [userId],
@@ -298,7 +298,7 @@ class GenieController extends BaseController {
 						const watchingIdsString = resultTotal
 							.map((row) => row.id)
 							.join(',');
-						SQL = `UPDATE genie_users SET genie_watching_ids=?, genie_watching_id_date=UTC_TIMESTAMP() WHERE id=?`;
+						SQL = `UPDATE genie_users SET genie_watching_ids=?,last_active=UTC_TIMESTAMP(), genie_watching_id_date=UTC_TIMESTAMP() WHERE id=?`;
 						await this.sequelize.query(SQL, {
 							replacements: [watchingIdsString, userId],
 							type: QueryTypes.UPDATE,

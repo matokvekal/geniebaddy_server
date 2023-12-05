@@ -1,7 +1,7 @@
 import BaseController from './baseController';
 const { QueryTypes } = require('sequelize');
 const { getFixedValue } = require('../utils/getFixedValues');
-
+import { CON } from '../constants/jenie';
 class ServerController extends BaseController {
 	constructor(app, modelName, sequelize) {
 		super(app, modelName, sequelize);
@@ -16,8 +16,8 @@ class ServerController extends BaseController {
 			const SQL = `
 			SELECT id, topic_name, active_genies ,color,used
 			FROM genie_topics 
-			WHERE is_active = 1 
-			ORDER BY used DESC
+			WHERE is_active = 1 and active_genies > ${CON.MIN_TOPICS_FOR_USE}
+			ORDER BY used DESC, active_genies DESC
 	  `;
 
 			const result = await this.sequelize.query(SQL, {
