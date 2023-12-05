@@ -62,7 +62,7 @@ class AuthController extends BaseController {
 					let user = userResult[0];
 					let user_role = userResult[0].user_role;
 
-					console.log('user', user);
+					// console.log('user', user);
 					if (!compare_passwords(password, user)) {
 						return await res.createErrorLogAndSend({
 							message: ServerLoginMessages.PASSWORD_IS_INCORRECT,
@@ -74,7 +74,7 @@ class AuthController extends BaseController {
 
 					SQL = `
 							UPDATE genie_users 
-							SET last_login="${moment().format('YYYY-MM-DD HH:mm:ss')}", token=:token,,last_active=UTC_TIMESTAMP() 
+							SET last_login="${moment().format('YYYY-MM-DD HH:mm:ss')}", token=:token,last_active=UTC_TIMESTAMP() 
 							WHERE user_name LIKE :user_name
 							`;
 					// console.log('SQL', SQL);

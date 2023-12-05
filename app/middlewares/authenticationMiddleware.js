@@ -93,10 +93,6 @@ const authenticationMiddleware = (db) => async (req, res, next) => {
 			const { last_login, user_name, user_role } = verifiedTokenValue;
 
 			if (last_login) {
-				// const SQL = `SELECT * FROM genie_users WHERE user_name = '${user_name}' AND
-				//  '${last_login}' >= DATE_SUB(CURDATE(), INTERVAL 180 DAY)`;
-				// //  console.log('SQL ', SQL)
-				// const [userRsult, metadata] = await db.sequelize.query(SQL);
 				const SQL = `SELECT * FROM genie_users WHERE user_name = :userName AND :lastLoginDate >= DATE_SUB(CURDATE(), INTERVAL 180 DAY)`;
 				const [userRsult, metadata] = await db.sequelize.query(SQL, {
 					replacements: {

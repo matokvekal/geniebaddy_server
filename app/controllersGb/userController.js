@@ -182,7 +182,7 @@ class UserController extends BaseController {
 	userSendPost = async (req, res) => {
 		console.log('get userSendPost');
 		// console.log('userpost', req.body);
-		let { topic_id, header, message, post_id, avatar } = req.body;
+		let { topic_id, header, message, post_id, avatar, userNickName } = req.body;
 
 		if (!message || !post_id) {
 			return res.status(400).json({ error: 'Invalid request' });
@@ -216,9 +216,10 @@ class UserController extends BaseController {
 							userRecordDate === today &&
 							numOfPosts >= config.USER_POSTS_PER_DAY
 						) {
-							return res
-								.status(400)
-								.json({ error: 'Daily post limit reached' });
+							return res.status(200).json({
+								status: 'limitReached',
+								message: 'Daily post limit reached',
+							});
 						}
 					}
 					const transaction = await this.sequelize.transaction();
@@ -268,15 +269,16 @@ class UserController extends BaseController {
 							transaction: transaction,
 						});
 
-						const SQL3 = `INSERT INTO genie_posts (is_active, post_status,status_time, topic_id, user_header, user_1, created_at, user_id,user_1_date,last_writen_by,user_avatar,user_read) 
-					   VALUES (1, '${postStatus.NEW}', UTC_TIMESTAMP(), :topic_id, '${headerData}', :user_1, UTC_TIMESTAMP(), :user_id,UTC_TIMESTAMP(),"user_1",:avatar,1)`;
+						const SQL3 = `INSERT INTO genie_posts (is_active, post_status,status_time, topic_id, user_header, user_1, created_at, user_id,user_1_date,last_writen_by,user_avatar,user_read,user_nickname) 
+					   VALUES (1, '${postStatus.NEW}', UTC_TIMESTAMP(), :topic_id, '${headerData}', :user_1, UTC_TIMESTAMP(), :user_id,UTC_TIMESTAMP(),"user_1",:avatar,1,:userNickName)`;
 						const newPost = await this.sequelize.query(SQL3, {
 							replacements: {
-								topic_id: int(topic_id),
+								topic_id: parseInt(topic_id),
 								header,
 								user_1: message,
-								user_id: int(user.id),
-								avatar: int(avatar),
+								user_id: parseInt(user.id),
+								avatar: parseInt(avatar),
+								userNickName: userNickName,
 							},
 							type: QueryTypes.INSERT,
 							transaction: transaction,
@@ -286,6 +288,7 @@ class UserController extends BaseController {
 						// checkAbuseAndAnonymize({ topic_id, header, message });
 						return res.status(200).json({
 							message: 'Post saved successfully',
+							status: 'success',
 							postId: newPost[0],
 						});
 					} catch (error) {
