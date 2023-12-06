@@ -23,7 +23,7 @@ class UserController extends BaseController {
                 join genie_topics as t
                 on t.id=p.topic_id 
 			WHERE user_id = :userId and p.is_active=1 AND t.is_active = 1 AND user_delete !=1 and( post_status= '${postStatus.OPEN}' or post_status='${postStatus.CLOSED}'
-			or post_status='${postStatus.NEW}' or post_status='${postStatus.USER_AI}' or post_status='${postStatus.GENIE_AI}')`;
+			or post_status='${postStatus.NEW}' or post_status='${postStatus.USER_AI}' or post_status='${postStatus.GENIE_AI}' or post_status='${postStatus.HOLD}')`;
 			// console.log('userGetPosts', SQL);
 			const result = await this.sequelize.query(SQL, {
 				replacements: { userId: user.id },
@@ -101,19 +101,19 @@ class UserController extends BaseController {
 		}
 	};
 
-	// GET /gb/usernewchats
+	// GET /gb/usernewchats  user check every 1 min for new chats
 	userGetNewChats = async (req, res) => {
 		const user = req.user;
 		console.log('at userGetNewChats');
 		try {
-			const SQL = `SELECT p.id, post_status, created_at, topic_id, user_header, user_1, user_3_date,last_writen_by,user_read,
-			genie_1, user_2, genie_2, user_3, genie_3, user_1_date, user_2_date,user_avatar,genie_avatar, 
-			user_3_date, genie_1_date, user_2_date, genie_2_date,rating 
+			const SQL = `SELECT p.id, post_status, created_at, topic_id,topic_name, user_header, user_1,last_writen_by,user_read,
+			genie_1, user_2, genie_2, user_3, genie_3, user_1_date,user_avatar,genie_avatar,user_nickname,genie_nickname,
+			user_3_date, genie_1_date, user_2_date, genie_2_date,genie_3_date,rating,user_save 
 			FROM genie_posts as p
                 join genie_topics as t
                 on t.id=p.topic_id
 			WHERE user_id = :userId and user_read=0  and p.is_active=1 AND t.is_active = 1 AND user_delete !=1 
-			and (post_status='${postStatus.OPEN}' or post_status='${postStatus.NEW}' or post_status='${postStatus.CLOSED}')`;
+			and (post_status='${postStatus.OPEN}' or post_status='${postStatus.NEW}' or post_status='${postStatus.CLOSED}' or post_status='${postStatus.USER_AI}' or post_status='${postStatus.GENIE_AI}' )`;
 
 			// console.log('userGetNewChats', SQL);
 			const result = await this.sequelize.query(SQL, {
