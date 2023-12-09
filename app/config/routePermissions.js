@@ -18,4 +18,6 @@ export default {
 	'/genienewposts': ['genie'],
 	'/geniepost': ['genie'],
 	'/geniereadposts': ['genie'],
+	'/genienewchats': ['genie'],
+	'/userrefreshposts': ['user'],
 };

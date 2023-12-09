@@ -30,7 +30,7 @@ class GenieController extends BaseController {
 		}
 
 		try {
-			const SQL = `SELECT p.id, post_status, created_at, topic_id,topic_name, user_header, user_1,last_writen_by,user_read,
+			const SQL = `SELECT p.id, post_status, created_at, topic_id,topic_name, user_header, user_1,last_writen_by,user_read,genie_read,
 			genie_1, user_2, genie_2, user_3, genie_3, user_1_date,user_avatar,genie_avatar,user_nickname,genie_nickname,
 			user_3_date, genie_1_date, user_2_date, genie_2_date,genie_3_date,rating,user_save
 			FROM genie_posts as p
@@ -85,6 +85,8 @@ class GenieController extends BaseController {
 				rating,
 				user_avatar,
 				genie_avatar,
+				genie_read,
+				user_read,
 				last_writen_by
 				FROM genie_posts as p
 				join genie_topics as t
@@ -96,11 +98,6 @@ class GenieController extends BaseController {
 			const result = await this.sequelize.query(SQL, {
 				type: QueryTypes.SELECT,
 			});
-
-			// const SQLUPDATE = `update genie_posts set genie_read=1 where genie_id=${userId} and genie_read=0 and post_status!='${postStatus.NEOPENW}'`;
-			// await this.sequelize.query(SQLUPDATE, {
-			// 	type: QueryTypes.UPDATE,
-			// });
 
 			return res.send({
 				result,
@@ -118,8 +115,7 @@ class GenieController extends BaseController {
 		const user = req.user;
 		const userId = user.id;
 
-
-		const { postId, avatar,genieNickname } = req.body;
+		const { postId, avatar, genieNickname } = req.body;
 		console.log(' post id =', postId);
 		if (!userId || !postId) {
 			return res.status(400).json({ error: 'No post  id' });
@@ -137,14 +133,18 @@ class GenieController extends BaseController {
 				}
 			}
 			//update to open selected post
-			SQL = `update genie_posts set post_status='${postStatus.OPEN}',genie_id=${userId},status_time=UTC_TIMESTAMP(),user_read=0,genie_avatar=:genie_avatar,genie_nickname=:genieNickname  where id=:postId and post_status='${postStatus.HOLD}'`;
+			SQL = `update genie_posts set post_status='${postStatus.OPEN}',genie_id=${userId},status_time=UTC_TIMESTAMP(),user_read=0,genie_read=0,genie_avatar=:genie_avatar,genie_nickname=:genieNickname  where id=:postId and post_status='${postStatus.HOLD}'`;
 			// console.log('SQL1	', SQL);
 			await this.sequelize.query(SQL, {
-				replacements: { postId: postId, genie_avatar: avatar ? avatar : 0,genieNickname:genieNickname },
+				replacements: {
+					postId: postId,
+					genie_avatar: avatar ? avatar : 0,
+					genieNickname: genieNickname,
+				},
 				type: QueryTypes.UPDATE,
 			});
 
-			//update to new all othr post of this genie
+			//update to new all other post of this genie(free other posts)
 			SQL = `update genie_posts set post_status='${postStatus.NEW}',genie_id=0,user_read=0,status_time=UTC_TIMESTAMP() where genie_id=${userId} and post_status='${postStatus.HOLD}'`;
 			// console.log('SQL2	', SQL);
 			await this.sequelize.query(SQL, {
@@ -188,7 +188,8 @@ class GenieController extends BaseController {
 			}
 			const watched = genieData.genie_watching_ids;
 			const leftWatch =
-				CON.MAX_GENIE_WATCH - (watched && watched.trim().length>0 ? watched.split(',').length : 0);
+				CON.MAX_GENIE_WATCH -
+				(watched && watched.trim().length > 0 ? watched.split(',').length : 0);
 
 			const leftAnswerMessages =
 				CON.MAX_GENIE_ANSWER -
@@ -338,8 +339,6 @@ class GenieController extends BaseController {
 		if (!message || !post_id) {
 			return res.status(400).json({ error: 'Invalid request' });
 		}
-		// const user = req.user;
-		// const today = moment.utc().format('YYYY-MM-DD');
 		try {
 			const SQL1 = `select * FROM genie_posts WHERE id = :post_id AND is_active = 1 and  post_status ="open"`;
 			const currentPost = await this.sequelize.query(SQL1, {
@@ -387,14 +386,14 @@ class GenieController extends BaseController {
 
 				return res.status(200).json({ message: 'Post updated successfully' });
 			} catch (error) {
-				console.error('Transaction was rolled back', error);
+				console.error('Error at genieSendPost', error);
 				return res.status(500).json({
 					error: 'Internal Server Error due to transaction failure',
 				});
 			}
 		} catch (error) {
 			console.error(error);
-			return res.status(500).json({ error: 'Internal Server Error' });
+			return res.status(500).json({ error: 'Internal Server Error genieSendPost' });
 		}
 	};
 
@@ -405,12 +404,13 @@ class GenieController extends BaseController {
 		console.log('at genieGetPostBiid');
 		try {
 			const SQL = `SELECT p.id, post_status, created_at, topic_id, user_header, user_1,last_writen_by,user_read,
-			genie_1, user_2, genie_2, user_3, genie_3, user_1_date,user_avatar,genie_avatar,user_nickname,genie_nickname,
-			user_3_date, genie_1_date, user_2_date, genie_2_date,genie_3_date,rating,user_save
+			genie_1, user_2, genie_2, user_3, genie_3, user_1_date,user_avatar,genie_avatar,user_nickname,genie_nickname,	genie_read,
+			user_read,			
+user_3_date, genie_1_date, user_2_date, genie_2_date,genie_3_date,rating,user_save
 			FROM genie_posts as p
                 join genie_topics as t
                 on t.id=p.topic_id
-			WHERE id = :post_id and user_id = :userId and p.is_active=1 AND t.is_active = 1 AND user_delete !=1 and( post_status= '${postStatus.OPEN}' or post_status='${postStatus.CLOSED}'
+			WHERE id = :post_id and genie_id = :userId and p.is_active=1 AND t.is_active = 1 AND user_delete !=1 and( post_status= '${postStatus.OPEN}' or post_status='${postStatus.CLOSED}'
 			or post_status='${postStatus.NEW}' or post_status='${postStatus.USER_AI}' or post_status='${postStatus.GENIE_AI}')`;
 			// console.log('userGetPosts', SQL);
 			const result = await this.sequelize.query(SQL, {
@@ -435,7 +435,7 @@ class GenieController extends BaseController {
 		const post_id = req.query.postid;
 		console.log('at geniereadposts');
 		try {
-			const SQL = `update genie_posts set genie_read=1 where id = :post_id and user_id=${user.id} and genie_read=0 and is_active=1`;
+			const SQL = `update genie_posts set genie_read=1 where id = :post_id and genie_id=${user.id} and genie_read=0 and is_active=1`;
 			console.log('r ', SQL);
 			const result = await this.sequelize.query(SQL, {
 				replacements: { post_id: post_id },
@@ -444,7 +444,7 @@ class GenieController extends BaseController {
 
 			// }
 			return res.send({
-				user_read: post_id,
+				post_id: post_id,
 			});
 		} catch (e) {
 			return await res.createErrorLogAndSend({
