@@ -7,8 +7,10 @@ export default {
 	'/action': ['user'],
 	'/getpostbyid': ['user'],
 	'/userreadposts': ['user'],
-	'/userposts': ['user'],
+	'/userrefreshposts': ['all'],
+	'/genierefreshposts': ['genie'],
 	'/userpost': ['user'],
+	'/userposts': ['user'],
 	'/usernewchats': ['user'],
 	'/getuserlimits': ['user'],
 	'/geniegetpostbyid': ['genie'],
@@ -19,5 +21,4 @@ export default {
 	'/geniepost': ['genie'],
 	'/geniereadposts': ['genie'],
 	'/genienewchats': ['genie'],
-	'/userrefreshposts': ['user'],
 };
