@@ -41,4 +41,9 @@ export default (router, app) => {
 		`/geniereadposts`,
 		genieController.genieReadPosts.bind(genieController),
 	);
+	// GET api/gb/genierefreshposts
+	router.get(
+		`/genierefreshposts`,
+		genieController.genieRefreshPosts.bind(genieController),
+	);
 };

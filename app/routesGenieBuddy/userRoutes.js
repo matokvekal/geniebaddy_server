@@ -8,8 +8,7 @@ export default (router, app) => {
 	router.get(`/userposts`, userController.userGetPosts.bind(userController));
 	// GET api/gb/userrefreshposts
 	router.get(`/userrefreshposts`, userController.userRefreshPosts.bind(userController));
-	// GET api/gb/genierefreshposts
-	router.get(`/genierefreshposts`, userController.genieRefreshPosts.bind(userController));
+
 	// GET api/gb/usernewchats
 	router.get(`/usernewchats`, userController.userGetNewChats.bind(userController));
 	// POST api/gb/userpost

@@ -65,6 +65,8 @@ class GenieController extends BaseController {
 		try {
 			const SQL = `SELECT p.id,
 			   post_status,
+				user_nickname,
+				genie_nickname,
 			   created_at,
 			   topic_id,
 				topic_name,
@@ -168,7 +170,36 @@ class GenieController extends BaseController {
 			});
 		}
 	};
+	// GET /gb/genierefreshposts
+	genieRefreshPosts = async (req, res) => {
+		const user = req.user;
+		console.log('at genieRefreshPosts');
+		try {
+			const SQL = `SELECT p.id, post_status, created_at, topic_id,topic_name, user_header, user_1,last_writen_by,user_read,
+			genie_1, user_2, genie_2, user_3, genie_3, user_1_date,user_avatar,genie_avatar,user_nickname,genie_nickname,
+			user_3_date, genie_1_date, user_2_date, genie_2_date,genie_3_date,rating,user_save
+			FROM genie_posts as p
+                join genie_topics as t
+                on t.id=p.topic_id 
+			WHERE genie_id = :userId and p.is_active=1 AND t.is_active = 1 AND user_delete !=1 and
+			(( post_status= '${postStatus.CLOSED}' && user_read=0) 
+			||( post_status= '${postStatus.OPEN}' 
+			or post_status='${postStatus.NEW}' or post_status='${postStatus.USER_AI}' or post_status='${postStatus.GENIE_AI}' or post_status='${postStatus.HOLD}'))`;
+			const result = await this.sequelize.query(SQL, {
+				replacements: { userId: user.id },
+				type: QueryTypes.SELECT,
+			});
 
+			return res.send({
+				result,
+			});
+		} catch (e) {
+			return await res.createErrorLogAndSend({
+				err: e,
+				message: 'Some error occurred while genieRefreshPosts',
+			});
+		}
+	};
 	// GET /gb/genienewposts //for claim
 	genieGetNewPosts = async (req, res) => {
 		console.log('at genieGetNewPosts');
@@ -221,6 +252,7 @@ class GenieController extends BaseController {
 					user_1, 
 					user_1_date, 
 					user_nickname,
+					genie_nickname,
 					last_writen_by 
 				FROM genie_posts as p
 				join genie_topics as t
@@ -248,6 +280,7 @@ class GenieController extends BaseController {
 					user_1, 
 					user_1_date, 
 					user_nickname,
+					genie_nickname,
 					last_writen_by 
 			   	FROM genie_posts as p
 				   join genie_topics as t
@@ -367,7 +400,8 @@ class GenieController extends BaseController {
 			try {
 				const SQL3 = `
 					UPDATE genie_posts
-					SET ${nextUserField} = :message, ${nextUserDateField} = UTC_TIMESTAMP(),last_writen_by = :last_writen_by
+					SET ${nextUserField} = :message, ${nextUserDateField} = UTC_TIMESTAMP(),genie_read=1,user_read=0,
+					last_writen_by = :last_writen_by
 					${
 						nextUserTurn === config.USER_CHATS_PER_POST
 							? `,post_status='closed',status_time=UTC_TIMESTAMP()`
@@ -393,7 +427,9 @@ class GenieController extends BaseController {
 			}
 		} catch (error) {
 			console.error(error);
-			return res.status(500).json({ error: 'Internal Server Error genieSendPost' });
+			return res
+				.status(500)
+				.json({ error: 'Internal Server Error genieSendPost' });
 		}
 	};
 
