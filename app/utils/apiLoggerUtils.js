@@ -60,7 +60,7 @@ export const loggerDebounce = (func, timeout = 300) => {
 
 export const createLogs = async (db) => {
 	//ERRORTEST this is temporary return to test the erros at db 04-12-2023
-	return;
+	// return;
 	console.log("at createLogs");
 	if (creationArr && creationArr.length) {
 		await db.logs.bulkCreate(creationArr);
@@ -72,7 +72,7 @@ export const debouncedCreateLogs =
 		(req, db) => {
 			console.log("at debouncedCreateLogs");
 				//ERRORTEST this is temporary return to test the erros at db 04-12-2023
-	return;
+	// return;
 			loggerDebounce(
 				async () => await action(db),
 				config.loggerDebounceAmountInMS
