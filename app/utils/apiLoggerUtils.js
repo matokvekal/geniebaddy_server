@@ -44,7 +44,7 @@ export const createErrorLog = async (db, req, error) => {
 
 export const loggerDebounce = (func, timeout = 300) => {
 	//ERRORTEST this is temporary return to test the erros at db 04-12-2023
-	return;
+	// return;
 	console.log("at loggerDebounce");
 	return (...args) => {
 		clearTimeout(timer);
