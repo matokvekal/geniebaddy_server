@@ -16,7 +16,7 @@ class ServerController extends BaseController {
 			const SQL = `
 			SELECT id, topic_name, active_genies ,color,used
 			FROM genie_topics 
-			WHERE is_active = 1 and active_genies > ${CON.MIN_TOPICS_FOR_USE}
+			WHERE is_active = 1 and ( active_genies > ${CON.MIN_TOPICS_FOR_USE} or is_default=1)
 			ORDER BY used DESC, active_genies DESC
 	  `;
 

@@ -95,7 +95,7 @@ class GenieController extends BaseController {
             on t.id=p.topic_id
 				WHERE
 				genie_id = ${userId} and 
-				post_status='${postStatus.OPEN}'`;
+				(post_status='${postStatus.OPEN}' or (post_status='${postStatus.CLOSED}' and genie_read=0))`;
 
 			const result = await this.sequelize.query(SQL, {
 				type: QueryTypes.SELECT,
@@ -170,7 +170,7 @@ class GenieController extends BaseController {
 			});
 		}
 	};
-	// GET /gb/genierefreshposts
+	// GET /gb/genierefreshposts  - after genie send message it will refresh the post
 	genieRefreshPosts = async (req, res) => {
 		const user = req.user;
 		console.log('at genieRefreshPosts');
@@ -418,6 +418,15 @@ class GenieController extends BaseController {
 					type: QueryTypes.UPDATE,
 				});
 
+				await this.sequelize.query('CALL genieUpdateRating(:genieId, :postId, :userId)', {
+					replacements: {
+						 genieId: post.genie_id,
+						 postId: post_id,
+						 userId: currentPost.user_id,
+					}
+			  });
+			  
+
 				return res.status(200).json({ message: 'Post updated successfully' });
 			} catch (error) {
 				console.error('Error at genieSendPost', error);
@@ -439,10 +448,10 @@ class GenieController extends BaseController {
 		const post_id = req.query.postId;
 		console.log('at genieGetPostBiid');
 		try {
-			const SQL = `SELECT p.id, post_status, created_at, topic_id, user_header, user_1,last_writen_by,user_read,
-			genie_1, user_2, genie_2, user_3, genie_3, user_1_date,user_avatar,genie_avatar,user_nickname,genie_nickname,	genie_read,
+			const SQL = `SELECT p.id, post_status, created_at, topic_id, user_header, user_1,last_writen_by,user_read,t.topic_name
+			genie_1, user_2, genie_2, user_3, genie_3, user_1_date,user_avatar,genie_avatar,user_nickname,genie_nickname,genie_read,
 			user_read,			
-user_3_date, genie_1_date, user_2_date, genie_2_date,genie_3_date,rating,user_save
+         user_3_date, genie_1_date, user_2_date, genie_2_date,genie_3_date,rating,user_save
 			FROM genie_posts as p
                 join genie_topics as t
                 on t.id=p.topic_id
