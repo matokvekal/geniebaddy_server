@@ -38,7 +38,7 @@ export const errorLoggerMiddleware = (db) => async (req, res, next) => {
 export const systemLoggerMiddleware = (db) => async (req, _res, next) => {
 	try {
 		// TODO: system logger for micro services
-		// createDebouncerForLogAction(createLogs)(req, db);
+		createDebouncerForLogAction(createLogs)(req, db);
 		return next();
 	} catch (err) {
 		console.error(`SYSTEM LOGGER FAILED - ${err}`);
