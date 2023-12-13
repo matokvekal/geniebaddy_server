@@ -1,13 +1,12 @@
-
-import user from './usersModel';
+// import user from './usersModel';
 
 import logs from './logsModel';
 import logErrors from './logErrorsModel';
 import log_users from './logUsersModel';
-  
+
 export default {
-	user,
+	// user,
 	logErrors,
 	logs,
 	log_users,
-};  
+};

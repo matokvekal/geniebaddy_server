@@ -26,7 +26,7 @@ export default async (config) => {
 		authentication: ALL,
 	};
 	GbRouter.use(middlewares.apiMiddleware);
-	GbRouter.use(middlewares.loggerMiddleware(db));
+	// GbRouter.use(middlewares.loggerMiddleware(db));
 	GbRouter.use(middlewares.errorLoggerMiddleware(db));
 	GbRouter.use(middlewares.textValidationMiddleware);
 	GbRouter.use(middlewares.authenticationMiddleware(db));

@@ -1,19 +1,9 @@
 import { ServerErrors } from '../constants/ServerMessages';
 import {
-	createDebouncerForLogAction,
 	createErrorLog,
-	createLogs,
+	// createLogs,
 } from '../utils/apiLoggerUtils';
 
-export const loggerMiddleware = (db) => async (req, _res, next) => {
-	try {
-		createDebouncerForLogAction(createLogs)(req, db);
-		return next();
-	} catch (err) {
-		console.error(`LOGGER FAILED - ${err}`);
-		return next();
-	}
-};
 
 export const errorLoggerMiddleware = (db) => async (req, res, next) => {
 	try {
@@ -35,13 +25,3 @@ export const errorLoggerMiddleware = (db) => async (req, res, next) => {
 	}
 };
 
-export const systemLoggerMiddleware = (db) => async (req, _res, next) => {
-	try {
-		// TODO: system logger for micro services
-		createDebouncerForLogAction(createLogs)(req, db);
-		return next();
-	} catch (err) {
-		console.error(`SYSTEM LOGGER FAILED - ${err}`);
-		return next();
-	}
-};

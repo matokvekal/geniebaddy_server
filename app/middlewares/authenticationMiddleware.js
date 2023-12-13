@@ -128,7 +128,7 @@ const authenticationMiddleware = (db) => async (req, res, next) => {
 					name: validFoundUser.name,
 				};
 			}
-			logUsers(req.user.email, token, req, db);
+			logUsers(req.user.user_name, token, req, db);
 			return next();
 		} catch (err) {
 			if (!canBypass) {
@@ -139,7 +139,7 @@ const authenticationMiddleware = (db) => async (req, res, next) => {
 					status: 403,
 				});
 			} else {
-				logUsers(req.user.email, 'canBypass', req, db);
+				logUsers(req.user.user_name, 'canBypass', req, db);
 				req.canBypass = true;
 				return next();
 			}
