@@ -7,5 +7,8 @@
     "MINUTES_TO_REMOVE_OLD_RIDERS":"60",
     "USER_CHATS_PER_POST":3,
     "USER_POSTS_PER_DAY":3,
-    "DEFAULT_TOPIC_ID":1
+    "DEFAULT_TOPIC_ID":1,
+    "IS_AI_WORKING":1,
+    "AI_USERS":"['user_1','user_2','user_3','genie_1','genie_2','genie_3']",
+    "AI_MESSAGE":"Message is tested by the Ai we will update you soon"
 }

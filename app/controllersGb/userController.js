@@ -75,7 +75,7 @@ class UserController extends BaseController {
 		const post_id = req.query.postid;
 		console.log('at userReadPosts');
 		try {
-			const SQL = `update genie_posts set user_read=1 where id = :post_id and user_id=${user.id} and user_read=0 and is_active=1`;
+			const SQL = `update genie_posts set user_read=1 where id = :post_id and user_id=${user.id} and user_read=0 and is_active=1  AND post_status != '${postStatus.USER_AI}'`;
 			console.log('r ', SQL);
 			const result = await this.sequelize.query(SQL, {
 				replacements: { post_id: post_id },
@@ -294,9 +294,18 @@ class UserController extends BaseController {
 							type: QueryTypes.UPDATE,
 							transaction: transaction,
 						});
-
-						const SQL3 = `INSERT INTO genie_posts (is_active, post_status,status_time, topic_id, user_header, user_1, created_at, user_id,user_1_date,last_writen_by,user_avatar,user_read,genie_read,user_nickname) 
+						//////////ai/////////////
+						let SQL3 = '';
+						if (
+							config.IS_AI_WORKING === 1 &&
+							config.AI_USERS.includes('user_1')
+						) {
+							SQL3 = `INSERT INTO genie_posts (is_active,user_1, post_status,status_time, topic_id, user_header, created_at, user_id,user_1_date,last_writen_by,user_avatar,user_read,genie_read,user_nickname,post_status_after_ai,ai_post_status,ai_post,ai_post_writer,ai_post_time)
+							VALUES (1,'${config.AI_MESSAGE}', '${postStatus.USER_AI}', UTC_TIMESTAMP(), :topic_id, '${headerData}', UTC_TIMESTAMP(), :user_id,UTC_TIMESTAMP(),"user_1",:avatar,0,0,:userNickName,'${postStatus.NEW}','${postStatus.NEW}', :user_1,'user_1',UTC_TIMESTAMP())`;
+						} else {
+							SQL3 = `INSERT INTO genie_posts (is_active, post_status,status_time, topic_id, user_header, user_1, created_at, user_id,user_1_date,last_writen_by,user_avatar,user_read,genie_read,user_nickname) 
 					   VALUES (1, '${postStatus.NEW}', UTC_TIMESTAMP(), :topic_id, '${headerData}', :user_1, UTC_TIMESTAMP(), :user_id,UTC_TIMESTAMP(),"user_1",:avatar,1,0,:userNickName)`;
+						}
 						const newPost = await this.sequelize.query(SQL3, {
 							replacements: {
 								topic_id: parseInt(topic_id),
@@ -355,21 +364,34 @@ class UserController extends BaseController {
 					}
 
 					// Concatenate strings directly for field names.
-					const nextUserField = 'user_' + nextUserTurn;
-					const nextUserDateField = nextUserField + '_date';
-					if (post[nextUserField] && post[nextUserField].trim().length > 0) {
+					const nextWriterUser = 'user_' + nextUserTurn;
+					const nextUserDateField = nextWriterUser + '_date';
+					if (post[nextWriterUser] && post[nextWriterUser].trim().length > 0) {
 						return res.status(400).json({ error: "It's not the user's turn" });
 					}
 					// const transaction = await this.sequelize.transaction();
 					try {
-						const SQL3 = `
-						UPDATE genie_posts
-						SET ${nextUserField} = :message, ${nextUserDateField} = UTC_TIMESTAMP(),last_writen_by = :last_writen_by, user_read=1,genie_read=0 
-						WHERE id = :post_id and post_status='${postStatus.OPEN}' and is_active=1 and user_delete !=1`;
+						let SQL3 = '';
+						if (
+							config.IS_AI_WORKING === 1 &&
+							config.AI_USERS.includes(nextWriterUser)
+						) {
+							SQL3 = `
+							UPDATE genie_posts
+							SET  ${nextUserDateField} = UTC_TIMESTAMP(),last_writen_by = :last_writen_by, user_read=0,genie_read=0,
+							post_status='${postStatus.USER_AI}',ai_post=:message,ai_post_writer=${nextWriterUser},${nextWriterUser} = '${postStatus.AI_MESSAGE}',post_status_after_ai='${postStatus.OPEN}'
+							WHERE id = :post_id and post_status='${postStatus.OPEN}' and is_active=1 and user_delete !=1`;
+						} else {
+							SQL3 = `
+							UPDATE genie_posts
+							SET ${nextWriterUser} = :message, ${nextUserDateField} = UTC_TIMESTAMP(),last_writen_by = :last_writen_by, user_read=1,genie_read=0,
+							WHERE id = :post_id and post_status='${postStatus.OPEN}' and is_active=1 and user_delete !=1`;
+						}
+
 						// console.log('SQL3', SQL3);
 						await this.sequelize.query(SQL3, {
 							replacements: {
-								last_writen_by: nextUserField,
+								last_writen_by: nextWriterUser,
 								message: message,
 								post_id: post_id,
 							},

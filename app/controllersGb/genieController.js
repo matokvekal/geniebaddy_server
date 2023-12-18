@@ -391,41 +391,67 @@ class GenieController extends BaseController {
 				return res.status(400).json({ error: 'Maximum post turns exceeded' });
 			}
 
-			const nextUserField = 'genie_' + turnMatch[1];
-			const nextUserDateField = nextUserField + '_date';
-			if (post[nextUserField] && post[nextUserField].trim().length > 0) {
+			const nextWriterGenie = 'genie_' + turnMatch[1];
+			const nextUserDateField = nextWriterGenie + '_date';
+			if (post[nextWriterGenie] && post[nextWriterGenie].trim().length > 0) {
 				return res.status(400).json({ error: "It's not the genies's turn" });
 			}
 
 			try {
-				const SQL3 = `
+				let SQL3 = '';
+				if (
+					config.IS_AI_WORKING === 1 &&
+					config.AI_USERS.includes(nextWriterGenie)
+				) {
+					SQL3 = `
 					UPDATE genie_posts
-					SET ${nextUserField} = :message, ${nextUserDateField} = UTC_TIMESTAMP(),genie_read=1,user_read=0,
-					last_writen_by = :last_writen_by
+					SET  ${nextWriterGenie} = '${postStatus.AI_MESSAGE}',
+					${nextUserDateField} = UTC_TIMESTAMP(),
+					genie_read=0,
+					user_read=0,
+					last_writen_by = :last_writen_by,
+					post_status = '${postStatus.GENIE_AI}',
+					ai_post=:message,
+					ai_post_writer=${nextWriterGenie},
+					ai_post_time=UTC_TIMESTAMP()
 					${
 						nextUserTurn === config.USER_CHATS_PER_POST
-							? `,post_status='closed',status_time=UTC_TIMESTAMP()`
+							? `,	post_status_after_ai='${postStatus.CLOSED}',status_time=UTC_TIMESTAMP()`
 							: ''
 					}
 					WHERE id = :post_id`;
-				// console.log('SQL3', SQL3);
+				} else {
+					SQL3 = `
+						UPDATE genie_posts
+						SET ${nextWriterGenie} = :message, ${nextUserDateField} = UTC_TIMESTAMP(),genie_read=1,user_read=0,
+						last_writen_by = :last_writen_by
+						${
+							nextUserTurn === config.USER_CHATS_PER_POST
+								? `,post_status='closed',status_time=UTC_TIMESTAMP()`
+								: ''
+						}
+						WHERE id = :post_id`;
+				}
+
 				await this.sequelize.query(SQL3, {
 					replacements: {
-						last_writen_by: nextUserField,
+						last_writen_by: nextWriterGenie,
 						message: message,
 						post_id: post_id,
 					},
 					type: QueryTypes.UPDATE,
 				});
 
-				await this.sequelize.query('CALL genieUpdateRating(:genieId, :postId, :userId)', {
-					replacements: {
-						 genieId: post.genie_id,
-						 postId: post_id,
-						 userId: currentPost.user_id,
-					}
-			  });
-			  
+				await this.sequelize.query(
+					'CALL genieUpdateRating(:genieId, :postId, :userId)',
+					{
+						replacements: {
+							genieId: post.genie_id,
+							postId: post_id,
+							userId: currentPost.user_id,
+						},
+					},
+				);
 
 				return res.status(200).json({ message: 'Post updated successfully' });
 			} catch (error) {
@@ -480,7 +506,7 @@ class GenieController extends BaseController {
 		const post_id = req.query.postid;
 		console.log('at geniereadposts');
 		try {
-			const SQL = `update genie_posts set genie_read=1 where id = :post_id and genie_id=${user.id} and genie_read=0 and is_active=1`;
+			const SQL = `update genie_posts set genie_read=1 where id = :post_id and genie_id=${user.id} and genie_read=0 and is_active=1  AND post_status != '${postStatus.GENIE_AI}`;
 			console.log('r ', SQL);
 			const result = await this.sequelize.query(SQL, {
 				replacements: { post_id: post_id },

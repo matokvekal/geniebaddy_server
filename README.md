@@ -2,7 +2,7 @@ at production
 1.add file .env  at /app/serve   ls-la (hidden file)
 pm2 delete 0
 2.run server :pm2 start ./app/index.js --node-args="-r esm" --name server-prod
-
+NGINX
 https://www.youtube.com/watch?v=NjYsXuSBZ5U
 
 UFW
