@@ -217,6 +217,7 @@ class UserController extends BaseController {
 		const today = moment.utc().format('YYYY-MM-DD');
 		try {
 			if (post_id === 'new') {
+				console.log('new post');
 				if (!topic_id) {
 					topic_id = config.DEFAULT_TOPIC_ID; // default topic
 				}
@@ -296,13 +297,20 @@ class UserController extends BaseController {
 						});
 						//////////ai/////////////
 						let SQL3 = '';
+						console.log(
+							'IS_AI_WORKING,config.AI_USERS.includes("user_1")',
+							config.IS_AI_WORKING,
+							config.AI_USERS.includes('user_1'),
+						);
 						if (
 							config.IS_AI_WORKING === 1 &&
 							config.AI_USERS.includes('user_1')
 						) {
+							console.log('ai working');
 							SQL3 = `INSERT INTO genie_posts (is_active,user_1, post_status,status_time, topic_id, user_header, created_at, user_id,user_1_date,last_writen_by,user_avatar,user_read,genie_read,user_nickname,post_status_after_ai,ai_post_status,ai_post,ai_post_writer,ai_post_time)
 							VALUES (1,'${config.AI_MESSAGE}', '${postStatus.USER_AI}', UTC_TIMESTAMP(), :topic_id, '${headerData}', UTC_TIMESTAMP(), :user_id,UTC_TIMESTAMP(),"user_1",:avatar,0,0,:userNickName,'${postStatus.NEW}','${postStatus.NEW}', :user_1,'user_1',UTC_TIMESTAMP())`;
 						} else {
+							console.log('ai not working');
 							SQL3 = `INSERT INTO genie_posts (is_active, post_status,status_time, topic_id, user_header, user_1, created_at, user_id,user_1_date,last_writen_by,user_avatar,user_read,genie_read,user_nickname) 
 					   VALUES (1, '${postStatus.NEW}', UTC_TIMESTAMP(), :topic_id, '${headerData}', :user_1, UTC_TIMESTAMP(), :user_id,UTC_TIMESTAMP(),"user_1",:avatar,1,0,:userNickName)`;
 						}
@@ -319,6 +327,7 @@ class UserController extends BaseController {
 							transaction: transaction,
 						});
 						await transaction.commit();
+						console.log('after commit');
 						// Sending to AI middleware (assuming function is implemented elsewhere)
 						// checkAbuseAndAnonymize({ topic_id, header, message });
 						return res.status(200).json({
