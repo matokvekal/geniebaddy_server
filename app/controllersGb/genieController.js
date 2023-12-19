@@ -443,12 +443,11 @@ class GenieController extends BaseController {
 				});
 
 				await this.sequelize.query(
-					'CALL genieUpdateRating(:genieId, :postId, :userId)',
+					'CALL genieUpdateRating(:genieId, :postId)',
 					{
 						replacements: {
 							genieId: post.genie_id,
 							postId: post_id,
-							userId: currentPost.user_id,
 						},
 					},
 				);
