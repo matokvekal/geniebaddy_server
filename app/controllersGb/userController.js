@@ -393,7 +393,7 @@ class UserController extends BaseController {
 						} else {
 							SQL3 = `
 							UPDATE genie_posts
-							SET ${nextWriterUser} = :message, ${nextUserDateField} = UTC_TIMESTAMP(),last_writen_by = :last_writen_by, user_read=1,genie_read=0,
+							SET ${nextWriterUser} = :message, ${nextUserDateField} = UTC_TIMESTAMP(),last_writen_by = :last_writen_by, user_read=1,genie_read=0
 							WHERE id = :post_id and post_status='${postStatus.OPEN}' and is_active=1 and user_delete !=1`;
 						}
 
