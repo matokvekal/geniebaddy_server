@@ -47,7 +47,7 @@ class AuthController extends BaseController {
 						status: 401,
 					});
 				}
-
+				user_name = user_name.toLowerCase();
 				let SQL = `SELECT * FROM genie_users WHERE user_name = :user_name and is_register=1 and is_active=1 and user_role=:user_role`;
 				userResult = await this.sequelize.query(SQL, {
 					type: QueryTypes.SELECT,
@@ -74,7 +74,9 @@ class AuthController extends BaseController {
 
 					SQL = `
 							UPDATE genie_users 
-							SET last_login="${moment().format('YYYY-MM-DD HH:mm:ss')}", token=:token,last_active=UTC_TIMESTAMP() 
+							SET last_login="${moment().format(
+								'YYYY-MM-DD HH:mm:ss',
+							)}", token=:token,last_active=UTC_TIMESTAMP() 
 							WHERE user_name LIKE :user_name
 							`;
 					// console.log('SQL', SQL);
@@ -242,10 +244,26 @@ class AuthController extends BaseController {
 			return await res.createErrorLogAndSend({ err });
 		}
 	};
+	validateName = (name) => {
+		return (
+			/^[a-zA-Z\u0080-\u024F\u0590-\u05FF\s\/\-\)\(\`\.\"\']+$/i.test(name) &&
+			name.length <= 45
+		);
+	};
+
+	validateMobile = (mobile) => {
+		return /^[0-9+\/-]+$/.test(mobile);
+	};
 	//post localhost:5000/api/gb/register
 	register = async (req, res) => {
 		try {
-			const { email, password, mobile } = req.body;
+			const { email, password, firstName, lastName, mobile } = req.body;
+			if (!firstName || !lastName || !mobile || !email || !password) {
+				return await res.createErrorLogAndSend({
+					message: ServerLoginMessages.NO_DATA,
+					status: 400,
+				});
+			}
 			if (email && password) {
 				const user_name = email.toString().trim();
 				if (!validateEmail(user_name)) {
@@ -254,7 +272,7 @@ class AuthController extends BaseController {
 						status: 401,
 					});
 				}
-				const SQL = `SELECT * FROM genie_users  WHERE 
+				let SQL = `SELECT * FROM genie_users  WHERE 
 				user_name =  '${user_name}'  and is_register=1 and is_active=1`;
 
 				const userResult = await this.sequelize.query(SQL, {
@@ -273,55 +291,52 @@ class AuthController extends BaseController {
 						status: 401,
 					});
 				}
-				const hashed_password = hash_password(password);
-
-				const { confirmationCode, lastConfirmationCodeDate } =
-					createConfirmationCode();
-
-				const emailResult = true;
-				if (emailResult) {
-					console.log(
-						'email did not sent due to Google stop this service for not secured apps',
-					);
+				if (!this.validateName(firstName) || !this.validateName(lastName)) {
+					return res.status(400).send({ message: 'Invalid name format' });
 				}
-				if (emailResult) {
-					let SQL = `
+
+				if (!this.validateMobile(mobile)) {
+					return res.status(400).send({ message: 'Invalid mobile format' });
+				}
+				const hashed_password = hash_password(password);
+				email = email.toLowerCase();
+				SQL = `
 					INSERT INTO  genie_users
 					( user_name,
-						email,
-						mobile,
+						genie_email,
+						user_role,
 						password,
+						comment,
 						is_active,
-						otp,
+						is_register,
 						validation_date,
-						otp_trys,
-						comment)
+						mobile,
+						genie_first_name,
+						genie_last_name
+						)
 					 VALUES
 				  (
 					${getFixedValue(user_name)},
 					${getFixedValue(user_name)},
-					${getFixedValue(mobile)},
+		         'genie',
 					${getFixedValue(hashed_password)},
+					"${password}",
 					 1,
-					${getFixedValue(confirmationCode)},
-					${getFixedValue(lastConfirmationCodeDate)},
 					 1,
-					${getFixedValue(password)}
-				  )
+					 "${moment().format('YYYY-MM-DD HH:mm:ss')}",
+					 ${getFixedValue(mobile)},
+					 ${getFixedValue(firstName)},
+					 ${getFixedValue(lastName)}
+														  )
 				`;
-					// console.log('SQL', SQL);
-					await this.sequelize.query(SQL, {
-						type: QueryTypes.INSERT,
-					});
-					return res.status(200).send({ result: 'sentOtpByMail' });
-				}
-				return await res.createErrorLogAndSend({
-					message: ServerLoginMessages.FAILED_TO_SEND_SMS_AND_EMAIL,
-					status: 400,
+				console.log('SQL', SQL);
+				await this.sequelize.query(SQL, {
+					type: QueryTypes.INSERT,
 				});
+				return res.status(200).send({ result: 'Saved' });
 			}
 			return await res.createErrorLogAndSend({
-				message: ServerLoginMessages.NO_DATA,
+				message: 'Error in register',
 				status: 400,
 			});
 		} catch (err) {

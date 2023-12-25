@@ -37,6 +37,7 @@ export default async (config) => {
 	initGbRoutes(GbRouter, app);
 
 	app.use('/api/gb', GbRouter);
+	app.use('/api/auth', GbRouter);
 	app.use(middlewares.errorMiddleware);
 	return app;
 };
