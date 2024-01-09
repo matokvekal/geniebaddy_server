@@ -24,11 +24,7 @@ const bypassPathsWhiteList = [
 	'/auth/forgot_password',
 	'/auth/reset_password',
 	'/auth/signUpPublic',
-	'/api/auth/registergenie',
-	'/api/auth/login',
-	'/api/auth/confirmCode',
-	'/api/auth/forgot_password',
-	'/api/auth/reset_password',
+	'/free',
 	'/api/auth/registeruser',
 
 	// '/gb',

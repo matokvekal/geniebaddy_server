@@ -371,6 +371,7 @@ class AuthController extends BaseController {
 	};
 	//post localhost:5000/api/gb/registeruser
 	registerUser = async (req, res) => {
+		console.log('at registerUser');
 		try {
 			let sql_state = 'insert';
 			const { email, password } = req.body;
