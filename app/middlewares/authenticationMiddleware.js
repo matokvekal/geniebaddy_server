@@ -24,22 +24,22 @@ const bypassPathsWhiteList = [
 	'/auth/forgot_password',
 	'/auth/reset_password',
 	'/auth/signUpPublic',
-	'/free',
-	'/api/auth/registeruser',
 	'/api/auth/registergenie',
 	'/api/auth/login',
 	'/api/auth/confirmCode',
 	'/api/auth/forgot_password',
 	'/api/auth/reset_password',
-	
+	'/api/auth/registeruser',
 
 	// '/gb',
 ];
 const bypassEnvsWhiteList = ['local'];
 
 const bypass = async (req, db) => {
-	console.log("at bypass")
-	console.log(bypassPathsWhiteList)
+	console.log('at bypass');
+	console.log(bypassPathsWhiteList);
+	console.log(req.originalUrl);
+	console.log(req.baseUrl);
 	const isPathCanBypass = bypassPathsWhiteList.find(
 		(allowedPath) =>
 			req.originalUrl.includes(allowedPath) ||
