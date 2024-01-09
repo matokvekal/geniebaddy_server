@@ -163,9 +163,9 @@ class AuthController extends BaseController {
 	// POST /api/auth/confirmCodeEmail
 	confirmCodeEmail = async (req, res) => {
 		try {
-			console.log('confirmCodeEmail');
-			const { email, confirmationCode } = req.body;
-			// const user_name = email.toString().trim();
+			console.log('at confirmCodeEmail');
+			let { email, confirmationCode } = req.body.values;
+			confirmationCode = confirmationCode.toString().trim();
 			const user_name = email.toString().trim();
 			if (!validateEmail(user_name)) {
 				return await res.createErrorLogAndSend({
@@ -173,7 +173,15 @@ class AuthController extends BaseController {
 					status: 401,
 				});
 			}
-			const SQL = `SELECT * FROM users  WHERE user_name like  '${user_name}' and is_register=0 and otp='${confirmationCode}' and otp_trys<10 `;
+
+			if (!confirmationCode.match(/^[0-9]{6}$/)) {
+				return await res.createErrorLogAndSend({
+					message: ServerLoginMessages.CONFITMATION_NOT_VALID,
+					status: 200,
+				});
+			}
+			const SQL = `SELECT * FROM genie_users  WHERE user_name like  '${user_name}' and is_register=0 `;
+			//  and otp='${confirmationCode}' and otp_trys<10 `;
 
 			const userResult = await this.sequelize.query(SQL, {
 				type: QueryTypes.SELECT,
@@ -181,10 +189,28 @@ class AuthController extends BaseController {
 			if (!userResult || !userResult[0]) {
 				return await res.createErrorLogAndSend({
 					message: ServerLoginMessages.USER_NOT_EXIST, //todo fix message
-					status: 401,
+					status: 200,
 				});
-			}
-			if (userResult) {
+			} else if (userResult[0].otp !== confirmationCode) {
+				return await res.createErrorLogAndSend({
+					message: ServerLoginMessages.CONFITMATION_NOT_VALID, //todo fix message
+					status: 200,
+				});
+			} else if (userResult[0].otp_trys > 9) {
+				return await res.createErrorLogAndSend({
+					message: ServerLoginMessages.TO_MANY_SMS_TRYS, //todo fix message
+					status: 200,
+				});
+			} else {
+				const SQL = `UPDATE genie_users set is_register=1,otp_trys=otp_trys+1,otp_sent_date='${moment().format(
+					'YYYY-MM-DD HH:mm:ss',
+				)}'  WHERE user_name like  '${user_name}'`;
+				//update  to register and otp +1
+				const userResult = await this.sequelize.query(SQL, {
+					type: QueryTypes.UPDATE,
+				});
+				return res.status(200).send({ message: 'success' });
+				//we will not use this approch for now
 				const user = userResult[0];
 				if (
 					confirmConfirmationCode(
@@ -254,8 +280,8 @@ class AuthController extends BaseController {
 	validateMobile = (mobile) => {
 		return /^[0-9+\/-]+$/.test(mobile);
 	};
-	//post localhost:5000/api/gb/register
-	register = async (req, res) => {
+	//post localhost:5000/api/gb/registergenie
+	registerGenie = async (req, res) => {
 		try {
 			const { email, password, firstName, lastName, mobile } = req.body;
 			if (!firstName || !lastName || !mobile || !email || !password) {
@@ -265,7 +291,7 @@ class AuthController extends BaseController {
 				});
 			}
 			if (email && password) {
-				const user_name = email.toString().trim();
+				const user_name = email.toString().trim().toLowerCase();
 				if (!validateEmail(user_name)) {
 					return await res.createErrorLogAndSend({
 						message: ServerLoginMessages.EMAIL_NOT_VALID,
@@ -273,7 +299,7 @@ class AuthController extends BaseController {
 					});
 				}
 				let SQL = `SELECT * FROM genie_users  WHERE 
-				user_name =  '${user_name}'  and is_register=1 and is_active=1`;
+					user_name =  '${user_name}'  and is_register=1 and is_active=1`;
 
 				const userResult = await this.sequelize.query(SQL, {
 					type: QueryTypes.SELECT,
@@ -299,8 +325,137 @@ class AuthController extends BaseController {
 					return res.status(400).send({ message: 'Invalid mobile format' });
 				}
 				const hashed_password = hash_password(password);
-				email = email.toLowerCase();
+
 				SQL = `
+						INSERT INTO  genie_users
+						( user_name,
+							genie_email,
+							user_role,
+							password,
+							comment,
+							is_active,
+							is_register,
+							validation_date,
+							mobile,
+							genie_first_name,
+							genie_last_name
+							)
+						 VALUES
+					  (
+						${getFixedValue(user_name)},
+						${getFixedValue(user_name)},
+						'genie',
+						${getFixedValue(hashed_password)},
+						"${password}",
+						 1,
+						 1,
+						 "${moment().format('YYYY-MM-DD HH:mm:ss')}",
+						 ${getFixedValue(mobile)},
+						 ${getFixedValue(firstName)},
+						 ${getFixedValue(lastName)}
+															  )
+					`;
+				console.log('SQL', SQL);
+				await this.sequelize.query(SQL, {
+					type: QueryTypes.INSERT,
+				});
+				return res.status(200).send({ result: 'Saved' });
+			}
+			return await res.createErrorLogAndSend({
+				message: 'Error in register',
+				status: 400,
+			});
+		} catch (err) {
+			return await res.createErrorLogAndSend({ err });
+		}
+	};
+	//post localhost:5000/api/gb/registeruser
+	registerUser = async (req, res) => {
+		try {
+			let sql_state = 'insert';
+			const { email, password } = req.body;
+
+			if (email && password) {
+				const user_name = email.toString().trim().toLowerCase();
+				if (!validateEmail(user_name)) {
+					return await res.createErrorLogAndSend({
+						message: ServerLoginMessages.EMAIL_NOT_VALID,
+						status: 401,
+					});
+				}
+				let SQL = `SELECT * FROM genie_users  WHERE 
+				user_name =  '${user_name}' limit 1`;
+
+				const userResult = await this.sequelize.query(SQL, {
+					type: QueryTypes.SELECT,
+				});
+				if (userResult && userResult[0]) {
+					if (
+						userResult[0].is_active === 1 &&
+						userResult[0].is_register === 1
+					) {
+						return res.status(200).send({
+							message: ServerLoginMessages.USER_ALREADY_EXIST,
+							status: 200,
+						});
+					}
+					if (
+						userResult[0].is_active === 0 &&
+						userResult[0].is_register === 1
+					) {
+						return res.status(200).send({
+							message: ServerLoginMessages.USER_CANT_REGISTER,
+							status: 200,
+						});
+					}
+
+					if (
+						userResult[0].is_active === 1 &&
+						userResult[0].is_register === 0
+					) {
+						if (
+							moment().diff(moment(userResult[0].last_updated), 'minutes') < 20
+						) {
+							return res.status(200).send({
+								message: ServerLoginMessages.TRY_LATER,
+								status: 200,
+							});
+						} else {
+							sql_state = 'update';
+						}
+					}
+				}
+				if (!validPassword(password.toString().trim())) {
+					//Minimum eight characters, at least one uppercase letter, one lowercase letter and one number:
+					return res.status(200).send({
+						message: ServerLoginMessages.PASSWORD_NOT_VALID,
+						status: 200,
+					});
+				}
+				const hashed_password = hash_password(password);
+				//new
+				const { confirmationCode, lastConfirmationCodeDate } =
+					createConfirmationCode();
+				//new
+				const emailResult = await sendConfirmationCodeByEmail(
+					user_name,
+					confirmationCode,
+				);
+				if (emailResult) {
+					if (sql_state === 'update') {
+						SQL = `UPDATE genie_users set
+						password=${getFixedValue(hashed_password)},
+						comment='${password}',
+						is_active=1,
+						is_register=0,
+						validation_date='${moment().format('YYYY-MM-DD HH:mm:ss')}',
+						otp='${confirmationCode}',
+						create_at='${moment().format('YYYY-MM-DD HH:mm:ss')}',
+						otp_trys=0,
+						last_updated='${moment().format('YYYY-MM-DD HH:mm:ss')}'
+						WHERE user_name = '${user_name}'`;
+					} else {
+						SQL = `
 					INSERT INTO  genie_users
 					( user_name,
 						genie_email,
@@ -310,30 +465,36 @@ class AuthController extends BaseController {
 						is_active,
 						is_register,
 						validation_date,
-						mobile,
-						genie_first_name,
-						genie_last_name
+						otp,
+						create_at,
+						otp_trys,
+						last_updated
 						)
 					 VALUES
 				  (
 					${getFixedValue(user_name)},
 					${getFixedValue(user_name)},
-		         'genie',
+		         'user',
 					${getFixedValue(hashed_password)},
-					"${password}",
+					'${password}',
 					 1,
-					 1,
-					 "${moment().format('YYYY-MM-DD HH:mm:ss')}",
-					 ${getFixedValue(mobile)},
-					 ${getFixedValue(firstName)},
-					 ${getFixedValue(lastName)}
+					 0,
+					 '${moment().format('YYYY-MM-DD HH:mm:ss')}',
+					 '${confirmationCode}',
+					 '${moment().format('YYYY-MM-DD HH:mm:ss')}',
+					 0,
+					 '${moment().format('YYYY-MM-DD HH:mm:ss')}'
 														  )
 				`;
-				console.log('SQL', SQL);
-				await this.sequelize.query(SQL, {
-					type: QueryTypes.INSERT,
-				});
-				return res.status(200).send({ result: 'Saved' });
+					}
+					console.log('SQL', SQL);
+					await this.sequelize.query(SQL, {
+						type: QueryTypes.INSERT,
+					});
+					return res.status(200).send({
+						message: 'sentOtpByMail',
+					});
+				}
 			}
 			return await res.createErrorLogAndSend({
 				message: 'Error in register',
@@ -355,7 +516,7 @@ class AuthController extends BaseController {
 						status: 401,
 					});
 				}
-				let SQL = `SELECT * FROM users  WHERE user_name like  '${user_name}' and is_active=1 and is_free=0`;
+				let SQL = `SELECT * FROM users  WHERE user_name like  '${user_name}' and is_active=1 `;
 
 				let userResult = await this.sequelize.query(SQL, {
 					type: QueryTypes.SELECT,
@@ -380,7 +541,7 @@ class AuthController extends BaseController {
 				const { confirmationCode, lastConfirmationCodeDate } =
 					createConfirmationCode();
 
-				SQL = `UPDATE users set otp="${confirmationCode}"  WHERE user_name like  '${user_name}' and is_active=1 and is_free=0`;
+				SQL = `UPDATE users set otp="${confirmationCode}"  WHERE user_name like  '${user_name}' and is_active=1 `;
 				//  SQL = `UPDATE users set last_reset_password="${moment()}"  WHERE user_name like  '${user_name}' and is_active=1` ;
 				userResult = await this.sequelize.query(SQL, {
 					type: QueryTypes.UPDATE,
@@ -408,7 +569,7 @@ class AuthController extends BaseController {
 						status: 401,
 					});
 				}
-				const SQL = `SELECT * FROM users  WHERE user_name like  '${user_name}' and is_active=1 and is_free=0`;
+				const SQL = `SELECT * FROM users  WHERE user_name like  '${user_name}' and is_active=1`;
 
 				const userResult = await this.sequelize.query(SQL, {
 					type: QueryTypes.SELECT,
@@ -437,7 +598,7 @@ class AuthController extends BaseController {
 					)
 				) {
 					const token = createToken(user_name, userResult[0].user_role);
-					const SQL = `UPDATE users set last_login="${moment()}",password="${new_password}",otp_trys=0  WHERE user_name like  '${user_name}' and is_active=1 and is_free=0`;
+					const SQL = `UPDATE users set last_login="${moment()}",password="${new_password}",otp_trys=0  WHERE user_name like  '${user_name}' and is_active=1 `;
 					const userResult = await this.sequelize.query(SQL, {
 						type: QueryTypes.UPDATE,
 					});

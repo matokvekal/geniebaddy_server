@@ -1,6 +1,7 @@
 export default {
 	'/login': ['all'],
-	'/register': ['all'],
+	'/registeruser': ['all'],
+	'/registergenie': ['all'],
 	'/forgot_password': ['all'],
 	'/reset_password': ['all'],
 	'/confirmCodeEmail': ['all'],

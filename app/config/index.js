@@ -47,8 +47,9 @@ const baseConfig = {
 	allowedAmountOfRequestsForIpPerMinute: 600,
 	allowedAmountOfRequestsForIpPerFullDay: 10000,
 	googlePhonenumber: '111111',
-	gmailUserName: '1@gmail.com',
-	gmailPassword: '11111',
+	gmailUserName: 'shareistheplace@gmail.com',
+	gmailPassword: 'astl unwy msev aocp',
+	// gmailPassword: 'share123$',
 	// TOKEN_KEY: process.env.COMMISSAIRE_TOKEN_KEY,
 };
 

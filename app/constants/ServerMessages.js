@@ -39,4 +39,9 @@ export const ServerLoginMessages = {
 	PASSWORD_NOT_VALID: 'This password is not valid',
 	ERORR: 'ERROR',
 	RACE_IS_NOT_PUBLIC: 'Cant find race / not public',
+	USER_CANT_REGISTER: 'User cant register call support',
+	TRY_LATER: 'Try again later',
+	CONFITMATION_NOT_VALID: 'Confirmation not valid',
+	USER_NOT_EXIST: 'User not exist',
+	TO_MANY_SMS_TRYS: 'To many trys',
 };

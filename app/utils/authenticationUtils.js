@@ -8,7 +8,9 @@ import bcrypt from 'bcryptjs';
 const salt = bcrypt.genSaltSync(config.passwordIncryptSalt);
 
 export const createConfirmationCode = () => {
-	const confirmationCode = Math.floor(1000 + Math.random() * 900000);
+	const min = 100000;
+	const max = 999999;
+	const confirmationCode = Math.floor(Math.random() * (max - min + 1)) + min;
 	return { confirmationCode, lastConfirmationCodeDate: moment() };
 };
 
@@ -79,7 +81,7 @@ export const getFixedPhoneNumber = (phoneNumber) => {
 export const sendConfirmationCodeByEmail = async (email, confirmationCode) => {
 	return await sendMail(
 		[email],
-		'Commissaire Confirmation Code',
+		'your Confirmation Code',
 		`Your Confirmation Code: ${confirmationCode}`,
 	);
 };
