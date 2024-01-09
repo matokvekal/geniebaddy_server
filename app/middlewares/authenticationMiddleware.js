@@ -25,6 +25,14 @@ const bypassPathsWhiteList = [
 	'/auth/reset_password',
 	'/auth/signUpPublic',
 	'/free',
+	'/api/auth/registeruser',
+	'/api/auth/registergenie',
+	'/api/auth/login',
+	'/api/auth/confirmCode',
+	'/api/auth/forgot_password',
+	'/api/auth/reset_password',
+	
+
 	// '/gb',
 ];
 const bypassEnvsWhiteList = ['local'];
