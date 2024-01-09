@@ -30,12 +30,15 @@ const bypassPathsWhiteList = [
 const bypassEnvsWhiteList = ['local'];
 
 const bypass = async (req, db) => {
+	log("at bypass")
+	console.log(bypassPathsWhiteList)
 	const isPathCanBypass = bypassPathsWhiteList.find(
 		(allowedPath) =>
 			req.originalUrl.includes(allowedPath) ||
 			req.baseUrl.includes(allowedPath),
 		// req.path.includes(allowedPath) || req.baseUrl.includes(allowedPath),
 	);
+	console.log('isPathCanBypass', isPathCanBypass);
 	if (!isPathCanBypass) {
 		const env = getEnv();
 		console.log('env bypass', env);
