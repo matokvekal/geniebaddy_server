@@ -334,7 +334,7 @@ class GenieController extends BaseController {
 							user_header: row.user_header,
 							user_1:
 								row.user_1.split(' ').slice(0, 20).join(' ') +
-								'.....................Select  this chat to read it  all', // Limit to 20 words
+								'......', // Limit to 20 words
 							topic_name: row.topic_name,
 							user_nickname: row.user_nickname,
 							topic_name: row.topic_name,
