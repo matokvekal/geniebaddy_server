@@ -4,6 +4,7 @@ const { getFixedValue } = require('../utils/getFixedValues');
 // import moment from 'moment';
 import { CON, postStatus } from '../constants/jenie';
 import config from '../config/config.json';
+import { sendEmailToUser } from '../utils/sendEmailsToUsers';
 
 class GenieController extends BaseController {
 	constructor(app, modelName, sequelize) {
@@ -12,6 +13,16 @@ class GenieController extends BaseController {
 
 	genieInfo = async (userId) => {
 		const SQL = `select * from genie_users where id = :userId and is_active=1 and blocked=0 and user_role='genie'`;
+		const result = await this.sequelize.query(SQL, {
+			replacements: {
+				userId: userId,
+			},
+			type: QueryTypes.SELECT,
+		});
+		return result;
+	};
+	userInfo = async (userId) => {
+		const SQL = `select * from genie_users where id = :userId and is_active=1 and blocked=0 and user_role='user'`;
 		const result = await this.sequelize.query(SQL, {
 			replacements: {
 				userId: userId,
@@ -332,9 +343,7 @@ class GenieController extends BaseController {
 							created_at: row.created_at,
 							topic_id: row.topic_id,
 							user_header: row.user_header,
-							user_1:
-								row.user_1.split(' ').slice(0, 20).join(' ') +
-								'......', // Limit to 20 words
+							user_1: row.user_1.split(' ').slice(0, 20).join(' ') + '......', // Limit to 20 words
 							topic_name: row.topic_name,
 							user_nickname: row.user_nickname,
 							topic_name: row.topic_name,
@@ -453,6 +462,20 @@ class GenieController extends BaseController {
 						},
 					},
 				);
+				//update user for new answer
+				const info = await this.userInfo(post.user_id);
+
+				let resultTotal = [];
+				if (info || info[0]) {
+					const userData = info[0];
+					sendEmailToUser(
+						userData.user_name,
+						post.user_nickname,
+						post.genie_nickname,
+					);
+				} else {
+					console.log('Error at genieSendPost: no user info');
+				}
 
 				return res.status(200).json({ message: 'Post updated successfully' });
 			} catch (error) {

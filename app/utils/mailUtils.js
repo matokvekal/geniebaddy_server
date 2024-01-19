@@ -14,14 +14,14 @@ const transporter = nodemailer.createTransport({
 	},
 });
 
-export const sendMail = async (recipients, head, body) => {
+export const sendMail = async (recipients, head, body, htmlContent = null) => {
 	try {
 		const result = await transporter.sendMail({
 			from: config.gmailUserName, // sender address
 			to: recipients.join(','), // list of receivers
 			subject: head, // Subject line
 			text: body, // plain text body
-			// html: "", // html body
+			html: htmlContent, // html body
 		});
 		return result;
 	} catch (err) {
