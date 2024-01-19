@@ -23,6 +23,7 @@ export const sendMail = async (recipients, head, body, htmlContent = null) => {
 			text: body, // plain text body
 			html: htmlContent, // html body
 		});
+		console.log(`EMAIL SENT - ${result}`)
 		return result;
 	} catch (err) {
 		console.error(`EMAIL ERROR - ${err}`);

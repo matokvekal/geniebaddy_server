@@ -17,7 +17,7 @@ import { sendMail } from './mailUtils';
 // };
 
 export const sendMauilToAdmin = async () => {
-	const email = 'mictavim@gmail.com';
+	// const email = 'mictavim@gmail.com';
 	//select count* from
 	return await sendMail(
 		'shareistheplace@gmail.com',
