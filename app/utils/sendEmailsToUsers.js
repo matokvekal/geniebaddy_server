@@ -32,7 +32,7 @@ export const sendEmailToUser = async (email, user_nickname, genie_nickname) => {
 		<p>Hello ${user_nickname},</p>
 		<p>Exciting news! ${genie_nickname}, a fellow member of our SHARE community, has read your post and shared a thoughtful response just for you.</p>
 		<p>Eager to see what they have to say? Click the button below to explore their message:</p>
-		<a href="https://commissaire.us/loginuser" 
+		<a href="https://commissaire.us/loginuser/refresh" 
 			style="background-color: #4CAF50; 
 					 color: white; 
 					 padding: 10px 20px; 
