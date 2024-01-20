@@ -3,7 +3,7 @@ const { QueryTypes } = require('sequelize');
 const { formidable } = require('formidable');
 import config from '../config/config.json';
 const fs = require('fs');
-const csv = require('csvtojson');
+const csv = require('csvtojson');v
 const query = require('../services/db').query;
 
 const { parseForm, runQuery } = require('../utils/forms');

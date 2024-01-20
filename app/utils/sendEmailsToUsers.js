@@ -1,5 +1,6 @@
 import { sendMail } from './mailUtils';
-
+const fs = require('fs');
+const path = require('path');
 // export const sendMail = async (recipients, head, body) => {
 // 	try {
 // 		const result = await transporter.sendMail({
@@ -28,9 +29,15 @@ export const sendMauilToAdmin = async () => {
 
 export const sendEmailToUser = async (email, user_nickname, genie_nickname) => {
 	try {
+		const imagePath = path.join(__dirname, '../assets/cherry.png'); // Replace with the actual path to your image
+		const imageBuffer = fs.readFileSync(imagePath);
+
+		// Convert the image to base64
+		const base64Image = imageBuffer.toString('base64');
+
 		const htmlContent = `
 		<p>Hello ${user_nickname},</p>
-		<p>Exciting news! ${genie_nickname}, a fellow member of our SHARE community, has read your post and shared a thoughtful response just for you.</p>
+		<p>Exciting news! ${genie_nickname}, a fellow member of our SHARE <h1>🍒</h1> community, has read your post and shared a thoughtful response just for you.</p>
 		<p>Eager to see what they have to say? Click the button below to explore their message:</p>
 		<a href="https://commissaire.us/loginuser/refresh" 
 			style="background-color: #4CAF50; 
@@ -45,7 +52,7 @@ export const sendEmailToUser = async (email, user_nickname, genie_nickname) => {
 					 border-radius: 5px;">
 			 View Response
 		</a>
-	`;
+		`;
 
 		return await sendMail(
 			[email],
